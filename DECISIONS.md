@@ -86,3 +86,18 @@ Status: active
 Decision: 84,103 English songs ingested into Postgres `song` table (instrumentals + empty lyrics dropped).
 Why: Confirms music4all is sufficient as the catalogue; no external lyric fetching needed.
 Status: active
+
+## D14 — Lyric embeddings: SBERT + pgvector ivfflat  (2026-08-03)
+Decision: `backend/embed.py` reads full lyrics from `data/music4all/lyrics/{id}.txt` (per-song files on disk — full text is never stored in Postgres, only in the git-ignored local cache), embeds each with `all-MiniLM-L6-v2` (384-dim) in batches of 128, stores vectors in a new `song.embedding vector(384)` column, then builds an `ivfflat` index with `vector_cosine_ops` and `lists = 100`. Resumable via `WHERE embedding IS NULL`.
+Why: Matches D1/D9 — SBERT dense retrieval, single pgvector store. Cosine chosen over L2/inner-product since SBERT similarity is orientation-based, not magnitude-based. `lists=100` follows pgvector's own `rows/1000` guideline for ~84k rows. Storing only embeddings (not full lyric text) in the DB keeps D5's copyright stance intact.
+Alternatives considered: HNSW index (better recall/speed at query time but slower to build and more memory; ivfflat is the documented default for this scale and simpler to justify in the write-up).
+Status: active
+
+## D15 — Ethics route confirmed by supervisor  (2026-08-03)
+Decision: Self-declaration for the Song Interpretation Dataset; no full application (no human subjects in evaluation). Confirmed by Varvara via email, 2026-08-03.
+Why: Offline evaluation uses only pre-existing secondary human data.
+Status: active
+
+## D16 — Embeddings complete + duplicate songs observed  (2026-08-03)
+Decision: All 84,103 songs embedded (all-MiniLM-L6-v2, 384-dim); ivfflat cosine index built and verified. Nearest-neighbour sanity check passed. Noted: catalogue contains near-duplicate songs (e.g. same track with punctuation variants) — to consider when computing evaluation metrics.
+Status: active
