@@ -101,3 +101,29 @@ Status: active
 ## D16 — Embeddings complete + duplicate songs observed  (2026-08-03)
 Decision: All 84,103 songs embedded (all-MiniLM-L6-v2, 384-dim); ivfflat cosine index built and verified. Nearest-neighbour sanity check passed. Noted: catalogue contains near-duplicate songs (e.g. same track with punctuation variants) — to consider when computing evaluation metrics.
 Status: active
+
+## D17 — Search is multi-modal; adopt hybrid retrieval + reranking  (date)
+Decision: Move from pure dense (SBERT) retrieval to a hybrid architecture — dense (SBERT) + sparse (Postgres full-text/BM25 over metadata + lyrics), fused with Reciprocal Rank Fusion, with an optional cross-encoder (ms-marco-MiniLM) reranking stage. Genre = soft signal (optional). Listening-history personalisation = further work.
+Why: Diagnostic testing showed dense retrieval fails known-item ("eminem lose yourself") and lyric-fragment ("hurry hurry step right up") queries — structurally, not fixably by tuning. Hybrid + rerank is the established fix; the dense/sparse/hybrid/rerank comparison becomes the core evaluation.
+Status: active — to build after the evaluation harness so each stage is measured, not assumed.
+
+## D18 — Song Interpretation Dataset sized against catalogue  (2026-08-06)
+Decision: Counted `data/songInterpretation/dataset_full_256_clean.json` (not loaded into DB yet). 310,315 interpretation records over 20,672 distinct `music4all_id`s. All 20,672 dataset songs are present in the 84,103-song English-filtered `song` table (100% overlap) — so all 310,315 interpretations are usable as evaluation queries.
+Why: Confirms the eval set (D2) is fully covered by the catalogue before building the query/ground-truth loading pipeline; no interpretations will be dropped for missing songs.
+Status: active
+
+## D19 — Dense-only baseline measured  (2026-08-06)
+Decision: `backend/evaluate.py` — one interpretation per song sampled with fixed seed (42) as query (20,672 queries), embedded with `all-MiniLM-L6-v2`, searched against `song.embedding` via pgvector cosine distance (`SET LOCAL ivfflat.probes = 100`, i.e. near-exhaustive since `lists=100`), top-20 retrieved. Result: Recall@1=0.099, Recall@5=0.152, Recall@10=0.176, MRR=0.124, nDCG@10=0.135. Saved to `backend/results/dense_baseline.json`.
+Why: Establishes the dense-only number the D17 hybrid architecture is meant to beat. Confirms D17's diagnostic finding at full scale, not just spot-checked queries — dense embeddings alone recover the source song for only ~18% of real user interpretations within the top 10, well short of ceiling.
+Alternatives considered: Vote-filtering interpretations to a "best" one per song — dataset has no vote/score field (this "Dataset Full" length-cleaned variant excludes it by design), so selection is a fixed-seed random pick per song instead.
+Status: active
+
+## D19 — Eval set = Dataset Full, one interpretation per song, no vote filter  (2026-08-06)
+Decision: Use the downloaded dataset_full_256_clean.json (= paper's "Dataset Full": 279,283 train + 31,032 valid = 310,315 interpretations). Already length-filtered (256-char min removes meaningless short ones). No vote field in this release; vote-filtered subsets are separate smaller files. Sample one interpretation per song (~20,672 queries) as the held-out evaluation set.
+Why: Length-cleaning already removes the main quality risk; vote filtering unavailable in this file and not required. Confirmed against Zhang et al. (ISMIR 2022), whose §5.3 runs the same SBERT+MRR description→song retrieval — our evaluation follows established methodology and can benchmark against their ~26–32% MRR.
+Status: active
+
+## D20 — Ethics self-declaration submitted  (2026-08-08)
+Decision: Self-declaration (Application 076709) submitted and signed via the Ethics Application System. Route: re-use of existing secondary data. Questionnaire answers: no primary collection; public-repository exemption applied; no re-identification; consent not originally sought but data anonymised/uncontactable (acceptable per policy); no offence risk. Awaiting supervisor countersign + Ethics Administrator check → confirmation letter for the dissertation appendix.
+Why: Confirms the ethics route Varvara advised; unblocks reporting evaluation results as final once the letter is issued.
+Status: active — pending confirmation letter
