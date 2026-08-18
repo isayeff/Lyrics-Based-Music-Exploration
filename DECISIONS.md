@@ -112,11 +112,6 @@ Decision: Counted `data/songInterpretation/dataset_full_256_clean.json` (not loa
 Why: Confirms the eval set (D2) is fully covered by the catalogue before building the query/ground-truth loading pipeline; no interpretations will be dropped for missing songs.
 Status: active
 
-## D19 — Dense-only baseline measured  (2026-08-06)
-Decision: `backend/evaluate.py` — one interpretation per song sampled with fixed seed (42) as query (20,672 queries), embedded with `all-MiniLM-L6-v2`, searched against `song.embedding` via pgvector cosine distance (`SET LOCAL ivfflat.probes = 100`, i.e. near-exhaustive since `lists=100`), top-20 retrieved. Result: Recall@1=0.099, Recall@5=0.152, Recall@10=0.176, MRR=0.124, nDCG@10=0.135. Saved to `backend/results/dense_baseline.json`.
-Why: Establishes the dense-only number the D17 hybrid architecture is meant to beat. Confirms D17's diagnostic finding at full scale, not just spot-checked queries — dense embeddings alone recover the source song for only ~18% of real user interpretations within the top 10, well short of ceiling.
-Alternatives considered: Vote-filtering interpretations to a "best" one per song — dataset has no vote/score field (this "Dataset Full" length-cleaned variant excludes it by design), so selection is a fixed-seed random pick per song instead.
-Status: active
 
 ## D19 — Eval set = Dataset Full, one interpretation per song, no vote filter  (2026-08-06)
 Decision: Use the downloaded dataset_full_256_clean.json (= paper's "Dataset Full": 279,283 train + 31,032 valid = 310,315 interpretations). Already length-filtered (256-char min removes meaningless short ones). No vote field in this release; vote-filtered subsets are separate smaller files. Sample one interpretation per song (~20,672 queries) as the held-out evaluation set.
@@ -127,3 +122,13 @@ Status: active
 Decision: Self-declaration (Application 076709) submitted and signed via the Ethics Application System. Route: re-use of existing secondary data. Questionnaire answers: no primary collection; public-repository exemption applied; no re-identification; consent not originally sought but data anonymised/uncontactable (acceptable per policy); no offence risk. Awaiting supervisor countersign + Ethics Administrator check → confirmation letter for the dissertation appendix.
 Why: Confirms the ethics route Varvara advised; unblocks reporting evaluation results as final once the letter is issued.
 Status: active — pending confirmation letter
+
+## D21 — Dense-only baseline measured  (2026-08-06)
+Decision: `backend/evaluate.py` — one interpretation per song sampled with fixed seed (42) as query (20,672 queries), embedded with `all-MiniLM-L6-v2`, searched against `song.embedding` via pgvector cosine distance (`SET LOCAL ivfflat.probes = 100`, i.e. near-exhaustive since `lists=100`), top-20 retrieved. Result: Recall@1=0.099, Recall@5=0.152, Recall@10=0.176, MRR=0.124, nDCG@10=0.135. Saved to `backend/results/dense_baseline.json`.
+Why: Establishes the dense-only number the D17 hybrid architecture is meant to beat. Confirms D17's diagnostic finding at full scale, not just spot-checked queries — dense embeddings alone recover the source song for only ~18% of real user interpretations within the top 10, well short of ceiling.
+Alternatives considered: Vote-filtering interpretations to a "best" one per song — dataset has no vote/score field (this "Dataset Full" length-cleaned variant excludes it by design), so selection is a fixed-seed random pick per song instead.
+Status: active
+
+## D22 — Baseline sanity check passed  (2026-08-10)
+Decision: Manually verified 5 random queries — all correct songs present in table with embeddings; misses are genuine ranking misses, not data gaps. Baseline (D21) confirmed trustworthy. Observed failure modes: vague/emotional interpretations (low signal) and title-bearing interpretations missed by dense (e.g. "Wild Wood" ranked 17 despite title in query) — the latter is the hybrid target.
+Status: active
