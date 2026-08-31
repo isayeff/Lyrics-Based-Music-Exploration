@@ -17,6 +17,9 @@ TOP_K = 20
 PROBES = 100
 SEED = 42
 RESULTS_PATH = "results/dense_baseline.json"
+PER_QUERY_PATH = "results/dense_per_query.json"
+TOP_K_FUSION = 50
+TOP50_PATH = "results/dense_top50.json"
 
 random.seed(SEED)
 
@@ -41,14 +44,17 @@ def to_vector_literal(vec):
 
 
 ranks = []
+top50_by_id = {}
 with engine.begin() as conn:
     conn.execute(text(f"SET LOCAL ivfflat.probes = {PROBES}"))
     for (song_id, _), emb in tqdm(zip(queries, embeddings), total=len(queries)):
         rows = conn.execute(
             text("SELECT id FROM song ORDER BY embedding <=> (:v)::vector LIMIT :k"),
-            {"v": to_vector_literal(emb), "k": TOP_K},
+            {"v": to_vector_literal(emb), "k": TOP_K_FUSION},
         ).fetchall()
-        retrieved = [row[0] for row in rows]
+        retrieved50 = [row[0] for row in rows]
+        top50_by_id[song_id] = retrieved50
+        retrieved = retrieved50[:TOP_K]  # unchanged: old metrics/outputs stay top-20-based
         rank = retrieved.index(song_id) + 1 if song_id in retrieved else None
         ranks.append(rank)
 
@@ -83,4 +89,14 @@ os.makedirs("results", exist_ok=True)
 with open(RESULTS_PATH, "w", encoding="utf-8") as f:
     json.dump(metrics, f, indent=2)
 
-print(f"saved to {RESULTS_PATH}")
+# per-query ranks, keyed by song id -> reused by evaluate_sparse.py for overlap analysis
+with open(PER_QUERY_PATH, "w", encoding="utf-8") as f:
+    json.dump({song_id: rank for (song_id, _), rank in zip(queries, ranks)}, f, indent=2)
+
+print(f"saved to {RESULTS_PATH} and {PER_QUERY_PATH}")
+
+# full top-50 ranked candidate lists per query, for RRF fusion (evaluate_hybrid.py)
+with open(TOP50_PATH, "w", encoding="utf-8") as f:
+    json.dump(top50_by_id, f)
+
+print(f"saved to {TOP50_PATH}")

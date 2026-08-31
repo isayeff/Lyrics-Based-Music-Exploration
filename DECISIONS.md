@@ -132,3 +132,43 @@ Status: active
 ## D22 — Baseline sanity check passed  (2026-08-10)
 Decision: Manually verified 5 random queries — all correct songs present in table with embeddings; misses are genuine ranking misses, not data gaps. Baseline (D21) confirmed trustworthy. Observed failure modes: vague/emotional interpretations (low signal) and title-bearing interpretations missed by dense (e.g. "Wild Wood" ranked 17 despite title in query) — the latter is the hybrid target.
 Status: active
+
+## D23 — Ethics approval received  (2026-08-20)
+Decision: Self-declaration approved 11/08/2026 (Application 076709, Eden Fowler, Departmental Ethics Administrator). Letter saved for dissertation appendix alongside the application PDF.
+Note: Any significant deviation from the approved documentation (e.g. adding human participants) requires informing the Ethics Administrator; full review may then be needed.
+Status: closed — supersedes D20
+
+## D24 — Typo tolerance deferred to further work  (2026-08-26)
+Decision: No fuzzy string matching on artist/title. Postgres full-text is exact-token; SBERT degrades gracefully but unreliably on misspellings.
+Why: The SID evaluation set contains no meaningful typo cases, so this would not affect measured results. pg_trgm on artist/song is the natural fix if pursued.
+Status: active — logged as further work
+
+## D25 — User accounts with synthetic credentials  (date)
+Decision: Implement real auth (Postgres user table, hashed passwords, JWT) using fabricated emails/passwords only. Enables listening history, taste onboarding, and personalised home screen.
+Why: No real personal data is collected, so no data subjects exist and the ethics self-declaration (D23) is unaffected. Only recruiting real users and reporting their data would constitute a deviation requiring notification.
+Status: active
+
+## D26 — Sparse queries filtered to K rarest lexemes  (date)
+Decision: For each query, keep only the ~15-20 lowest document-frequency lexemes (df precomputed corpus-wide via ts_stat) before OR-joining into the tsquery.
+Why: OR-of-all-lexemes matched 61,451/84,103 songs (73% of corpus) per query, and ts_rank_cd applies no IDF weighting — so ubiquitous terms ("love", "never") contributed as much as distinctive ones, diluting ranking quality. Restricting to rare lexemes approximates the IDF weighting that BM25 provides natively, making the sparse baseline a fairer stand-in for BM25. Also reduces runtime from ~3.3h to tractable.
+Status: active
+
+## D27 — Sparse (lexical FTS) baseline measured; dense vs sparse overlap  (2026-08-30)
+Decision: Added `song.tsv tsvector` (weighted: artist+title = A, full lyrics = B via `setweight`) built by `backend/index_sparse.py`, GIN-indexed (`idx_song_tsv_gin`), resumable/idempotent (`WHERE tsv IS NULL`). `backend/evaluate_sparse.py` reuses the exact same query set as `evaluate.py` (same file, same `random.seed(42)` sampling) for direct comparability, then ranks candidates with `ts_rank_cd` over an OR-of-rarest-20-lexemes tsquery (D26). Result: Recall@1=0.007, Recall@5=0.026, Recall@10=0.044, MRR=0.017, nDCG@10=0.022 — well below dense (D21: nDCG@10=0.135). Overlap (correct song in top 10): both=466, dense-only=3173, sparse-only=435, neither=16598. Saved to `backend/results/sparse_baseline.json`, `sparse_per_query.json`, `dense_vs_sparse_overlap.json`; dense per-query ranks also now saved to `backend/results/dense_per_query.json` (added to evaluate.py) so overlap could be computed without re-running dense retrieval.
+Why: A first spec-literal attempt used `plainto_tsquery`/`websearch_to_tsquery` as named in the original plan — both AND every query lexeme together. Interpretation-comment queries run 50-300+ words, so requiring the full vocabulary in one song's tsvector matched only 3/20,672 queries (recall@10 ≈ 0.0001), which is a broken query, not a real measurement of lexical retrieval quality. Fixed by building the tsquery as an OR of lexemes instead (`to_tsquery` from `tsvector_to_array`, lexemes quoted to survive stray punctuation) — this OR-of-everything then matched ~73% of the corpus per query, which is what D26's rarest-lexeme filter fixes.
+Sparse alone is markedly weaker than dense, consistent with D17: user interpretations paraphrase meaning in their own words rather than reusing lyric/title vocabulary. But sparse uniquely recovers 435 songs dense misses entirely — real complementary signal, supporting D17's hybrid/RRF direction rather than dense-alone.
+Observed data-quality wrinkle (not fixed, just noted): for some queries the "rarest" lexemes chosen were scraper/forum boilerplate fragments (e.g. `linkno`, `replyther`, `movedand` — leftover HTML/page-chrome text in the interpretation comments), not meaningful content words. Worth a cleaning pass before this number is treated as more than a baseline.
+Status: active
+
+## D28 — Why sparse wins where dense misses: lexical leakage, not semantic strength  (2026-08-30)
+Decision: `backend/analyze_sparse_only.py` isolated the 435 D27 sparse-only queries (correct song in sparse top 10, not dense top 10), saved a 30-example sample (seed 42) to `backend/results/sparse_only_examples.json` (query text, artist, title, both ranks), then measured over all 435 whether the query text contains the song title, the artist name, or a verbatim 5+ word contiguous span of that song's own lyrics (case-insensitive). Result: title in query 58.6% (255/435), artist in query 28.3% (123/435), 5+ word lyric span 46.2% (201/435).
+Why: Confirms sparse's 435 wins over dense (D27) are not evidence of general lexical-retrieval strength — they're overwhelmingly queries that leak the answer verbatim (commenters naming the title/artist directly, or quoting a lyric line as evidence for their interpretation, e.g. "Apply Some Pressure" quoted almost verbatim in its own interpretation). Dense SBERT is comparatively weak on these because near-verbatim short quoted spans don't dominate a mean-pooled sentence embedding of a long paraphrasing comment the way an exact keyword match dominates `ts_rank_cd`. This sharpens the hybrid case from D17/D27: sparse's contribution isn't "different semantic coverage," it's "exact-match recovery when the user happens to quote the answer" — a real, complementary, but narrower signal than raw overlap numbers suggested.
+Status: active
+
+## D29 — Passage-level embedding deferred to further work  (2026-08-30)
+Decision: Retain whole-song embedding. Passage-level (chunk) embedding is documented as further work rather than implemented. A pilot on a ~5,000-song subset remains optional if the write-up is ahead of schedule after 10 September.
+Why: D28 showed 46.2% of sparse-only wins contained a verbatim 5+ word lyric span, and dense misses these because mean-pooling over a full lyric text dilutes any single line (the same mechanism behind the "Hurry hurry, step right up" probe failure). Passage-level embedding addresses this directly, and — since misremembered lyrics tend to preserve semantic and rhythmic structure — would also cover lexical-substitution errors that sparse retrieval cannot handle. However, chunking 84,103 songs yields roughly 0.5-1M passages: ~10x the original embedding cost, plus new schema, index, fusion logic and evaluation. With the dissertation due 16 September, writing is the binding constraint, not implementation.
+Important qualification: passage-level is not superior to whole-song, only better on different query types (quotation and heterogeneous-content songs vs holistic thematic description). The correct framing is a third complementary retriever fused alongside dense and sparse, not a replacement.
+Also noted: aggregating passage scores by counting matches introduces a length bias (longer songs accumulate more matches); max-pooling is the standard alternative. And the D27 rarest-lexeme filter may select a misremembered rare word as a key search term, directing sparse retrieval toward a term present in no correct document — a plausible failure mode under realistic queries.
+Full reasoning and literature in `notes-chunking-and-error-tolerance.md`.
+Status: active — further work

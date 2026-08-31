@@ -1,0 +1,13 @@
+{
+  "model": "postgres_fts_english_ts_rank_cd",
+  "n_queries": 20672,
+  "top_k": 20,
+  "query_fn": "to_tsquery_or_of_rarest_lexemes",
+  "max_query_lexemes": 20,
+  "seed": 42,
+  "recall@1": 0.00696594427244582,
+  "recall@5": 0.02597716718266254,
+  "recall@10": 0.04358552631578947,
+  "mrr": 0.01744482054614806,
+  "ndcg@10": 0.022041810789565484
+}
