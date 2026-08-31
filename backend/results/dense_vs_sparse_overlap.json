@@ -2,6 +2,6 @@
   "n_queries": 20672,
   "both_top10": 466,
   "dense_only_top10": 3173,
-  "sparse_only_top10": 435,
-  "neither_top10": 16598
+  "sparse_only_top10": 437,
+  "neither_top10": 16596
 }

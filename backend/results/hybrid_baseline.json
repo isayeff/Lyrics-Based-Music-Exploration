@@ -1,0 +1,12 @@
+{
+  "method": "reciprocal_rank_fusion",
+  "n_queries": 20672,
+  "k": 60,
+  "fused_over_top_n": 50,
+  "note": "Fusion operates over each retriever's saved top-50 candidate list. A song ranked, say, 60th by one retriever and not retrieved at all by the other contributes nothing and cannot surface here -- these numbers are a lower bound relative to fusing deeper (or full-corpus) candidate sets.",
+  "recall@1": 0.10913312693498452,
+  "recall@5": 0.16002321981424147,
+  "recall@10": 0.1802438080495356,
+  "mrr": 0.13420675165608853,
+  "ndcg@10": 0.1420098262167443
+}

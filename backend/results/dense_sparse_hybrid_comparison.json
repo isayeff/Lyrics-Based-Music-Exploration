@@ -1,0 +1,24 @@
+{
+  "dense": {
+    "recall@1": 0.09911958204334366,
+    "recall@5": 0.15208978328173375,
+    "recall@10": 0.17603521671826625,
+    "mrr": 0.12412255982825483,
+    "ndcg@10": 0.1349245507488689
+  },
+  "sparse": {
+    "recall@1": 0.007062693498452012,
+    "recall@5": 0.02631578947368421,
+    "recall@10": 0.04368227554179566,
+    "mrr": 0.017553019162815455,
+    "ndcg@10": 0.022129337493954442
+  },
+  "hybrid": {
+    "recall@1": 0.10913312693498452,
+    "recall@5": 0.16002321981424147,
+    "recall@10": 0.1802438080495356,
+    "mrr": 0.13420675165608853,
+    "ndcg@10": 0.1420098262167443
+  },
+  "note": "Fusion operates over each retriever's saved top-50 candidate list. A song ranked, say, 60th by one retriever and not retrieved at all by the other contributes nothing and cannot surface here -- these numbers are a lower bound relative to fusing deeper (or full-corpus) candidate sets. dense/sparse rows here are the original top-20 baselines (D19/D27), unaffected by this rerun."
+}
