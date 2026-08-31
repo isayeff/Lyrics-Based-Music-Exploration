@@ -1,7 +1,8 @@
 import json
 import math
 import traceback
-from collections import defaultdict
+
+from retrieval import rrf_fuse  # shared with the API so the two cannot drift (D31)
 
 DENSE_TOP50_PATH = "results/dense_top50.json"
 SPARSE_TOP50_PATH = "results/sparse_top50.json"
@@ -26,16 +27,6 @@ NOTE = (
     "contributes nothing and cannot surface here -- these numbers are a lower "
     "bound relative to fusing deeper (or full-corpus) candidate sets."
 )
-
-
-def rrf_fuse(dense_list, sparse_list, k):
-    scores = defaultdict(float)
-    for rank, sid in enumerate(dense_list, start=1):
-        scores[sid] += 1.0 / (k + rank)
-    for rank, sid in enumerate(sparse_list, start=1):
-        scores[sid] += 1.0 / (k + rank)
-    ranked = sorted(scores.items(), key=lambda kv: -kv[1])
-    return [sid for sid, _ in ranked]
 
 
 def recall_at(ranks, k):

@@ -1,1 +1,47 @@
 @import "tailwindcss";
+
+/* Tailwind v4 is CSS-first: the palette lives here, not in tailwind.config.js.
+   These generate the same utility names a v3 `colors: {}` block would
+   (bg-bg, bg-surface, text-muted, border-border, bg-accent, ...).
+
+   #E80003 (accent) is for interactive + active state ONLY: button fills, focus
+   rings, active pills/nav items, play icons. Never body text. Hover lifts the
+   surface (surface -> surfaceHover) instead of adding red. */
+@theme {
+  --color-bg: #0A0A0B;
+  --color-surface: #141416;
+  --color-surfaceHover: #1C1C1F;
+  --color-border: #26262A;
+  --color-text: #F5F5F5;
+  --color-muted: #8A8A90;
+  --color-accent: #E80003;
+  --color-accentHover: #FF1A1D;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Skeleton shimmer — used instead of spinners for every loading state. */
+@keyframes shimmer {
+  0% { opacity: 0.45; }
+  50% { opacity: 0.85; }
+  100% { opacity: 0.45; }
+}
+
+.skeleton {
+  background-color: var(--color-surfaceHover);
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+/* Keyboard focus only — no red ring on mouse click. */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
