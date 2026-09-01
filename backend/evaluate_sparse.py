@@ -7,19 +7,21 @@ from dotenv import load_dotenv
 from sqlalchemy import create_engine, text
 from tqdm import tqdm
 
+import retrieval  # shared dense/sparse/RRF logic — single source of truth (D31, D36)
+
 load_dotenv()
 engine = create_engine(os.environ["DATABASE_URL"])
 
 DATASET_PATH = "../data/songInterpretation/dataset_full_256_clean.json"
 TOP_K = 20
-MAX_QUERY_LEXEMES = 20  # keep only the K rarest lexemes per query (see build_or_tsquery)
 SEED = 42
-RESULTS_PATH = "results/sparse_baseline.json"
-PER_QUERY_PATH = "results/sparse_per_query.json"
+# v2 filenames: the D27/D30 numbers stay on disk for before/after comparison (D36)
+RESULTS_PATH = "results/sparse_baseline_v2.json"
+PER_QUERY_PATH = "results/sparse_per_query_v2.json"
 DENSE_PER_QUERY_PATH = "results/dense_per_query.json"
-OVERLAP_PATH = "results/dense_vs_sparse_overlap.json"
+OVERLAP_PATH = "results/dense_vs_sparse_overlap_v2.json"
 TOP_K_FUSION = 50
-TOP50_PATH = "results/sparse_top50.json"
+TOP50_PATH = "results/sparse_top50_v2.json"
 
 random.seed(SEED)
 
@@ -43,42 +45,11 @@ with engine.connect() as conn:
 print(f"{len(term_df)} distinct lexemes in corpus")
 
 
-def build_or_tsquery(conn, query_text):
-    # Queries here are long free-text interpretations (50-300+ words), not short
-    # keyword searches. plainto_tsquery/websearch_to_tsquery AND every lexeme
-    # together, so requiring the full query vocabulary in one song's tsvector
-    # almost never matches (measured recall@10 ~0.0001). OR-ing every lexeme
-    # instead matched 73% of the corpus for a typical query (~0.6s/query, and
-    # ts_rank_cd has no IDF term so ubiquitous words like "love"/"never" count
-    # the same as distinctive ones). Fix: keep only the MAX_QUERY_LEXEMES
-    # rarest lexemes per query (by corpus document frequency) before OR-ing.
-    # Lexemes are quoted (with ' doubled) so stray special characters can't
-    # break tsquery syntax.
-    lexemes = conn.execute(
-        text("SELECT tsvector_to_array(to_tsvector('english', :t))"), {"t": query_text}
-    ).scalar()
-    if not lexemes:
-        return None
-    lexemes = sorted(lexemes, key=lambda lex: term_df.get(lex, 0))[:MAX_QUERY_LEXEMES]
-    return " | ".join("'" + lex.replace("'", "''") + "'" for lex in lexemes)
-
-
 def sparse_search_ids(conn, query_text, k=TOP_K):
-    tsq_input = build_or_tsquery(conn, query_text)
-    if tsq_input is None:
-        return []
-    rows = conn.execute(
-        text("""
-            WITH q AS (SELECT to_tsquery('english', :tsq) AS tsq)
-            SELECT song.id
-            FROM song, q
-            WHERE song.tsv @@ q.tsq
-            ORDER BY ts_rank_cd(song.tsv, q.tsq) DESC
-            LIMIT :k
-        """),
-        {"tsq": tsq_input, "k": k},
-    ).fetchall()
-    return [row[0] for row in rows]
+    """Delegates to the shared retriever so the harness and the /search endpoint
+    rank identically — a demo that does not match the reported numbers is exactly
+    what sharing this prevents (D36)."""
+    return [sid for sid, _ in retrieval.sparse_search(conn, query_text, k, term_df)]
 
 
 ranks = []
@@ -106,7 +77,10 @@ metrics = {
     "n_queries": len(ranks),
     "top_k": TOP_K,
     "query_fn": "to_tsquery_or_of_rarest_lexemes",
-    "max_query_lexemes": MAX_QUERY_LEXEMES,
+    "max_query_lexemes": retrieval.MAX_QUERY_LEXEMES,
+    "rank_weights_DCBA": retrieval.RANK_WEIGHTS,
+    "rank_normalization": retrieval.RANK_NORMALIZATION,
+    "tiebreak": "song.id ASC",
     "seed": SEED,
     "recall@1": recall_at(1),
     "recall@5": recall_at(5),

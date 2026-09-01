@@ -1,0 +1,107 @@
+{
+  "catalogue_size": 84103,
+  "duplicate_groups": 1419,
+  "songs_in_duplicate_group": 2972,
+  "pct_catalogue_in_duplicate_group": 3.53,
+  "eval_songs": 20672,
+  "eval_songs_in_duplicate_group": 949,
+  "pct_eval_in_duplicate_group": 4.59,
+  "group_size_histogram": {
+    "2": 1300,
+    "3": 104,
+    "4": 15
+  },
+  "examples": [
+    {
+      "artist": "queen",
+      "key_title": "another one bites the dust",
+      "records": [
+        {
+          "id": "OmP7bfqgxsNxTdSD",
+          "song": "Another One Bites The Dust (Remastered 2011)"
+        },
+        {
+          "id": "kYHNyEfPAxIOb97I",
+          "song": "Another One Bites the Dust"
+        },
+        {
+          "id": "4Y4l5B4IkrYncIqh",
+          "song": "Another One Bites The Dust - Remastered 2011"
+        }
+      ]
+    },
+    {
+      "artist": "tori amos",
+      "key_title": "sugar",
+      "records": [
+        {
+          "id": "Oq2exb8fCBQ1IOWd",
+          "song": "Sugar (live)"
+        },
+        {
+          "id": "aCpAz7Mm9EZjXKfK",
+          "song": "Sugar - Live"
+        },
+        {
+          "id": "WpdDWsVvrXp0cSoW",
+          "song": "Sugar"
+        }
+      ]
+    },
+    {
+      "artist": "metallica",
+      "key_title": "fade to black",
+      "records": [
+        {
+          "id": "Oy5hq2gaEpiBvXiy",
+          "song": "Fade To Black - Remastered"
+        },
+        {
+          "id": "PGcrRYjHYRstlZq5",
+          "song": "Fade To Black (Remastered)"
+        },
+        {
+          "id": "IklGEyByIlkV4X0W",
+          "song": "Fade to Black"
+        }
+      ]
+    },
+    {
+      "artist": "whitney houston",
+      "key_title": "i wanna dance with somebody",
+      "records": [
+        {
+          "id": "rUM4MqRAtABrxlsi",
+          "song": "I Wanna Dance with Somebody"
+        },
+        {
+          "id": "Wg9WILZyJcNYOIc5",
+          "song": "I Wanna Dance with Somebody - Single Version"
+        },
+        {
+          "id": "oJssb1ZaNh3V7JDw",
+          "song": "I Wanna Dance with Somebody - Live from That's What Friends Are For: Arista Records 15th Anniversary Concert"
+        }
+      ]
+    },
+    {
+      "artist": "elvis presley",
+      "key_title": "are you lonesome tonight",
+      "records": [
+        {
+          "id": "GaeB6YuJ2CKei7b4",
+          "song": "Are You Lonesome Tonight?"
+        },
+        {
+          "id": "UNKms8OUuf9LjSU2",
+          "song": "Are You Lonesome Tonight? - Remastered"
+        },
+        {
+          "id": "UkOYEwL2gnjRx6JT",
+          "song": "Are You Lonesome Tonight"
+        }
+      ]
+    }
+  ],
+  "note": "Grouping key is normalised artist + title with version/edition qualifiers stripped. This is an upper-bound estimate of the duplicate problem: some same-title pairs are genuinely different recordings."
+}

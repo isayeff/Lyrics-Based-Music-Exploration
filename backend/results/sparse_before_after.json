@@ -1,0 +1,294 @@
+{
+  "old_config": {
+    "weights_DCBA": [
+      0.1,
+      0.2,
+      0.4,
+      1.0
+    ],
+    "normalization": 0
+  },
+  "new_config": {
+    "weights_DCBA": [
+      0.02,
+      0.05,
+      0.05,
+      1.0
+    ],
+    "normalization": 1
+  },
+  "queries": {
+    "eminem killshot": {
+      "target_rank_before": 2,
+      "target_rank_after": 1,
+      "top5_before": [
+        {
+          "rank": 1,
+          "title": "Brainless",
+          "artist": "Eminem",
+          "score": 4.6
+        },
+        {
+          "rank": 2,
+          "title": "KILLSHOT",
+          "artist": "Eminem",
+          "score": 2.4
+        },
+        {
+          "rank": 3,
+          "title": "The Real Slim Shady",
+          "artist": "Eminem",
+          "score": 1.8
+        },
+        {
+          "rank": 4,
+          "title": "Kill You",
+          "artist": "Eminem",
+          "score": 1.8
+        },
+        {
+          "rank": 5,
+          "title": "My 1st Single",
+          "artist": "Eminem",
+          "score": 1.8
+        }
+      ],
+      "top5_after": [
+        {
+          "rank": 1,
+          "title": "KILLSHOT",
+          "artist": "Eminem",
+          "score": 0.3223
+        },
+        {
+          "rank": 2,
+          "title": "Revival (interlude)",
+          "artist": "Eminem",
+          "score": 0.3001
+        },
+        {
+          "rank": 3,
+          "title": "Parking Lot (Skit)",
+          "artist": "Eminem",
+          "score": 0.273
+        },
+        {
+          "rank": 4,
+          "title": "Public Service Announcement",
+          "artist": "Eminem",
+          "score": 0.2583
+        },
+        {
+          "rank": 5,
+          "title": "Ken Kaniff",
+          "artist": "Eminem",
+          "score": 0.2285
+        }
+      ]
+    },
+    "The Cranberries Ridiculous Thoughts": {
+      "target_rank_before": null,
+      "target_rank_after": 1,
+      "top5_before": [
+        {
+          "rank": 1,
+          "title": "Thought About You",
+          "artist": "Tim McGraw",
+          "score": 12.2
+        },
+        {
+          "rank": 2,
+          "title": "Second To None",
+          "artist": "Phoenix",
+          "score": 12.0
+        },
+        {
+          "rank": 3,
+          "title": "I Thought I Knew It All",
+          "artist": "Megadeth",
+          "score": 11.8
+        },
+        {
+          "rank": 4,
+          "title": "Thought of You",
+          "artist": "Justin Bieber",
+          "score": 11.4
+        },
+        {
+          "rank": 5,
+          "title": "Just Thought You Should Know",
+          "artist": "Betty Who",
+          "score": 10.6
+        }
+      ],
+      "top5_after": [
+        {
+          "rank": 1,
+          "title": "Ridiculous Thoughts",
+          "artist": "The Cranberries",
+          "score": 0.6479
+        },
+        {
+          "rank": 2,
+          "title": "Ridiculous Thoughts - Acoustic Version",
+          "artist": "The Cranberries",
+          "score": 0.6463
+        },
+        {
+          "rank": 3,
+          "title": "Thought About You",
+          "artist": "Tim McGraw",
+          "score": 0.4843
+        },
+        {
+          "rank": 4,
+          "title": "I Thought I Knew It All",
+          "artist": "Megadeth",
+          "score": 0.4784
+        },
+        {
+          "rank": 5,
+          "title": "Thought of You",
+          "artist": "Justin Bieber",
+          "score": 0.4458
+        }
+      ]
+    },
+    "cranberries": {
+      "target_rank_before": 1,
+      "target_rank_after": 1,
+      "top5_before": [
+        {
+          "rank": 1,
+          "title": "Hollywood",
+          "artist": "The Cranberries",
+          "score": 1.0
+        },
+        {
+          "rank": 2,
+          "title": "Go Your Own Way",
+          "artist": "The Cranberries",
+          "score": 1.0
+        },
+        {
+          "rank": 3,
+          "title": "Daffodil Lament",
+          "artist": "The Cranberries",
+          "score": 1.0
+        },
+        {
+          "rank": 4,
+          "title": "When You're Gone - Acoustic Version",
+          "artist": "The Cranberries",
+          "score": 1.0
+        },
+        {
+          "rank": 5,
+          "title": "The Rebels",
+          "artist": "The Cranberries",
+          "score": 1.0
+        }
+      ],
+      "top5_after": [
+        {
+          "rank": 1,
+          "title": "All Over Now",
+          "artist": "The Cranberries",
+          "score": 0.2693
+        },
+        {
+          "rank": 2,
+          "title": "Cranberry Curtain",
+          "artist": "Fox Academy",
+          "score": 0.2675
+        },
+        {
+          "rank": 3,
+          "title": "All Over Now - Edit",
+          "artist": "The Cranberries",
+          "score": 0.2659
+        },
+        {
+          "rank": 4,
+          "title": "All Over Now (Edit)",
+          "artist": "The Cranberries",
+          "score": 0.2659
+        },
+        {
+          "rank": 5,
+          "title": "I Will Always",
+          "artist": "The Cranberries",
+          "score": 0.2659
+        }
+      ]
+    },
+    "The Cranberries Zombie": {
+      "target_rank_before": 8,
+      "target_rank_after": 1,
+      "top5_before": [
+        {
+          "rank": 1,
+          "title": "My Body's a Zombie for You",
+          "artist": "Dead Man's Bones",
+          "score": 11.0
+        },
+        {
+          "rank": 2,
+          "title": "Zombie",
+          "artist": "Natalia Kills",
+          "score": 9.8
+        },
+        {
+          "rank": 3,
+          "title": "Zombie",
+          "artist": "Jamie T",
+          "score": 9.0
+        },
+        {
+          "rank": 4,
+          "title": "Zombie Stomp",
+          "artist": "Ozzy Osbourne",
+          "score": 8.6
+        },
+        {
+          "rank": 5,
+          "title": "Zombie",
+          "artist": "Bad Wolves",
+          "score": 8.2
+        }
+      ],
+      "top5_after": [
+        {
+          "rank": 1,
+          "title": "Zombie - Acoustic Version",
+          "artist": "The Cranberries",
+          "score": 0.5792
+        },
+        {
+          "rank": 2,
+          "title": "Zombie (Acoustic Version)",
+          "artist": "The Cranberries",
+          "score": 0.5792
+        },
+        {
+          "rank": 3,
+          "title": "Zombie",
+          "artist": "The Cranberries",
+          "score": 0.544
+        },
+        {
+          "rank": 4,
+          "title": "My Body's a Zombie for You",
+          "artist": "Dead Man's Bones",
+          "score": 0.4243
+        },
+        {
+          "rank": 5,
+          "title": "Zombie",
+          "artist": "Bad Wolves",
+          "score": 0.3997
+        }
+      ]
+    }
+  }
+}

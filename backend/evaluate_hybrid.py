@@ -1,21 +1,26 @@
+import sys
 import json
 import math
 import traceback
 
 from retrieval import rrf_fuse  # shared with the API so the two cannot drift (D31)
 
-DENSE_TOP50_PATH = "results/dense_top50.json"
-SPARSE_TOP50_PATH = "results/sparse_top50.json"
-DENSE_PER_QUERY_PATH = "results/dense_per_query.json"  # top-20-based, from evaluate.py
-SPARSE_PER_QUERY_PATH = "results/sparse_per_query.json"  # top-20-based, from evaluate_sparse.py
-DENSE_BASELINE_PATH = "results/dense_baseline.json"
-SPARSE_BASELINE_PATH = "results/sparse_baseline.json"
+# Optional suffix argument: `python evaluate_hybrid.py v2` fuses the re-ranked
+# sparse lists (D36) and writes *_v2 outputs, leaving the D30 files intact.
+SUFFIX = f"_{sys.argv[1]}" if len(sys.argv) > 1 else ""
 
-HYBRID_BASELINE_PATH = "results/hybrid_baseline.json"
-HYBRID_PER_QUERY_PATH = "results/hybrid_per_query.json"
-K_SENSITIVITY_PATH = "results/hybrid_k_sensitivity.json"
-COMPARISON_PATH = "results/dense_sparse_hybrid_comparison.json"
-VS_PARENTS_PATH = "results/hybrid_vs_parents.json"
+DENSE_TOP50_PATH = "results/dense_top50.json"  # dense is unchanged by D36
+SPARSE_TOP50_PATH = f"results/sparse_top50{SUFFIX}.json"
+DENSE_PER_QUERY_PATH = "results/dense_per_query.json"  # top-20-based, from evaluate.py
+SPARSE_PER_QUERY_PATH = f"results/sparse_per_query{SUFFIX}.json"  # from evaluate_sparse.py
+DENSE_BASELINE_PATH = "results/dense_baseline.json"
+SPARSE_BASELINE_PATH = f"results/sparse_baseline{SUFFIX}.json"
+
+HYBRID_BASELINE_PATH = f"results/hybrid_baseline{SUFFIX}.json"
+HYBRID_PER_QUERY_PATH = f"results/hybrid_per_query{SUFFIX}.json"
+K_SENSITIVITY_PATH = f"results/hybrid_k_sensitivity{SUFFIX}.json"
+COMPARISON_PATH = f"results/dense_sparse_hybrid_comparison{SUFFIX}.json"
+VS_PARENTS_PATH = f"results/hybrid_vs_parents{SUFFIX}.json"
 
 PRIMARY_K = 60
 K_VALUES = [10, 60, 200]

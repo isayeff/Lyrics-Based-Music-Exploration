@@ -43,7 +43,7 @@ export default function Home({ recent, onSearch }) {
           Describe a song. Find it.
         </h1>
         <p className="text-muted text-sm max-w-xl mx-auto">
-          Search 84,000 songs by what they’re about — not by title or artist.
+          Search 84,000 songs by not just by title or artist also <b>search what they’re about.</b>
         </p>
         <div className="max-w-2xl mx-auto pt-1">
           <SearchBar recent={recent} onSubmit={runSearch} autoFocus size="lg" />
