@@ -1,0 +1,6 @@
+{
+  "hybrid_solves_neither_parent_top10": 153,
+  "hybrid_loses_vs_dense_top10": 352,
+  "n_queries": 20672,
+  "note": "top10 membership for dense/sparse uses the original top-20 per-query files (D19/D27); hybrid uses k=60 fusion over top-50."
+}

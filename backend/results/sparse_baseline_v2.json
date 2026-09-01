@@ -1,0 +1,21 @@
+{
+  "model": "postgres_fts_english_ts_rank_cd",
+  "n_queries": 20672,
+  "top_k": 20,
+  "query_fn": "to_tsquery_or_of_rarest_lexemes",
+  "max_query_lexemes": 20,
+  "rank_weights_DCBA": [
+    0.02,
+    0.05,
+    0.05,
+    1.0
+  ],
+  "rank_normalization": 1,
+  "tiebreak": "song.id ASC",
+  "seed": 42,
+  "recall@1": 0.017995356037151702,
+  "recall@5": 0.0528734520123839,
+  "recall@10": 0.07507739938080496,
+  "mrr": 0.035388061322449545,
+  "ndcg@10": 0.043076825506176454
+}

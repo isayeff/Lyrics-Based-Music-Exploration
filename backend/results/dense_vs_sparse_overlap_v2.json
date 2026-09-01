@@ -1,0 +1,7 @@
+{
+  "n_queries": 20672,
+  "both_top10": 613,
+  "dense_only_top10": 3026,
+  "sparse_only_top10": 939,
+  "neither_top10": 16094
+}

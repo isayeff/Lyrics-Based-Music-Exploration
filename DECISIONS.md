@@ -235,3 +235,27 @@ Status: active — quantified, deliberately not fixed before the presentation
 Decision: Wording correction to D17 ("Postgres full-text/BM25") and D26 ("a fairer stand-in for BM25"). The sparse retriever is Postgres `ts_rank_cd`, which is **not** BM25 and has no IDF component whatsoever — it scores weighted term frequency and cover density only. The dissertation and presentation should describe it as "Postgres full-text search (`ts_rank_cd`)", never as BM25.
 Why: the claim is inaccurate and would not survive a viva question. D26's rarest-lexeme filter and D36's weight array together approximate *some* of what BM25 provides (term selectivity, field weighting, length normalisation), but approximating parts of BM25 is not implementing it. A genuine BM25 or BM25F implementation remains the principled fix and is a candidate for further work.
 Status: active — corrects wording in D17 and D26, which stand unedited per the append-only rule
+
+## D39 — D36 fix measured on the full corpus: sparse ~2x, hybrid +8%  (2026-09-01)
+Decision: Re-ran the full evaluation with the D36 sparse ranking fix. Identical query set, `random.seed(42)`, one interpretation per song, 20,672 queries; the dense arm is untouched. Results written to `*_v2.json` so the D27/D30 figures survive for comparison.
+
+| system | R@1 | R@5 | R@10 | MRR | nDCG@10 |
+|---|---|---|---|---|---|
+| dense | 0.0991 | 0.1521 | 0.1760 | 0.1241 | 0.1349 |
+| sparse-old | 0.0071 | 0.0263 | 0.0437 | 0.0176 | 0.0221 |
+| sparse-new | 0.0180 | 0.0529 | 0.0751 | 0.0354 | 0.0431 |
+| hybrid-old | 0.1091 | 0.1600 | 0.1802 | 0.1342 | 0.1420 |
+| hybrid-new | 0.1149 | 0.1721 | 0.1988 | 0.1439 | 0.1534 |
+
+Sparse improved by roughly 2x on every metric (nDCG@10 1.95x, Recall@1 2.55x). Hybrid improved ~8% (nDCG@10 0.1420 -> 0.1534) with no change to the dense arm or to the fusion itself — purely from better sparse input. Hybrid-new is the best configuration measured so far. Sparse-only top-10 wins more than doubled (435 -> 939, D27 overlap re-run), "both" rose 466 -> 613, and "neither" fell 16,598 -> 16,094. k-sensitivity is unchanged in shape: k=60 remains the best of {10, 60, 200} and still saturates by 60 (k=200 is within 0.0002).
+Why this is worth stating plainly: the concern going in was that suppressing lyric weight would fix short known-item queries at the cost of the long interpretation queries the evaluation is built from. It did not — both improved, and the offline metric improved substantially. The mechanism is D28's: 58.6% of sparse-only wins already contained the song title in the query text, so weighting title/artist correctly helps the interpretation queries too. There was no tradeoff to report.
+Method note: the ranking configuration was chosen from a 300-query sample (predicted nDCG@10 0.0403) before committing to the full run, which measured 0.0431. The sample was a reliable guide, which is what made it affordable to compare four configurations instead of guessing one and spending 3.5h per candidate.
+Cost: the fix is query-time only, but it is not free — the full sparse run took 3h26m against ~3h before, because normalisation flag 1 requires document length and the explicit weight array adds per-row work over the ~6,000 candidate rows a typical query ranks. Interactive latency is still ~0.2s, so this matters only to the batch harness.
+Status: active — supersedes the sparse and hybrid figures in D27 and D30, which stand unedited per the append-only rule
+
+## D40 — Open: RRF consensus penalises single-retriever known-item hits  (2026-09-01)
+Decision: Recorded, deliberately not acted on. With sparse fixed, hybrid is now *worse than sparse alone* on short known-item queries: `eminem killshot` returns KILLSHOT at sparse rank 1 but hybrid rank 6; `The Cranberries Zombie` returns the targets at sparse ranks 1-3 but hybrid ranks 8/10/12.
+Cause: RRF rewards cross-retriever agreement. For `eminem killshot`, "'Till I Collapse" appears in both lists (dense 1, sparse 21) and scores 1/61 + 1/81 = 0.0287, beating KILLSHOT's sparse-only 1/61 = 0.0164. Dense cannot retrieve an exact title match it has no semantic signal for, so on known-item queries only one retriever *can* be right, and consensus-weighting actively buries the correct answer. This is the same mechanism as D30's "hybrid loses 352 queries dense had solved", observed in the opposite direction.
+Why not fixed now: every plausible remedy — per-retriever weighting in the fusion, query-adaptive routing (short keyword-like query -> favour sparse; long descriptive query -> favour dense), or a score-based rather than rank-based fusion — changes the headline hybrid numbers and would require another full re-run to report honestly. Hybrid is the UI default, so this is user-visible and should be named in the presentation as a known limitation rather than discovered by an examiner.
+Note the tension worth stating: hybrid is the best system on the offline metric (D39) while being the worst of the three on exactly the short known-item queries a demo audience is most likely to type. That is a query-distribution argument, not a contradiction — and it is the same lesson as D36.
+Status: open — candidate for the 5-16 September window

@@ -1,0 +1,26 @@
+{
+  "note": "Fusion operates over each retriever's saved top-50 candidate list. A song ranked, say, 60th by one retriever and not retrieved at all by the other contributes nothing and cannot surface here -- these numbers are a lower bound relative to fusing deeper (or full-corpus) candidate sets.",
+  "by_k": {
+    "10": {
+      "recall@1": 0.1141640866873065,
+      "recall@5": 0.16684404024767802,
+      "recall@10": 0.1948529411764706,
+      "mrr": 0.14104177724642822,
+      "ndcg@10": 0.15000827985311813
+    },
+    "60": {
+      "recall@1": 0.11488970588235294,
+      "recall@5": 0.17211687306501547,
+      "recall@10": 0.19881965944272445,
+      "mrr": 0.1439086374601791,
+      "ndcg@10": 0.15340706224727388
+    },
+    "200": {
+      "recall@1": 0.11455108359133127,
+      "recall@5": 0.17216524767801858,
+      "recall@10": 0.19881965944272445,
+      "mrr": 0.14368730440941493,
+      "ndcg@10": 0.15324180967639828
+    }
+  }
+}
