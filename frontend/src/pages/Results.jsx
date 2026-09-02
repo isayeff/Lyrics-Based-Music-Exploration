@@ -98,7 +98,17 @@ export default function Results({ recent, onSearch }) {
             </div>
           </div>
 
-          <p className="text-xs text-muted -mt-2">{MODE_HINT[mode]}</p>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted -mt-2">
+            <span>{MODE_HINT[mode]}</span>
+            {mode === 'hybrid' && data && (
+              <span className="flex items-center gap-1.5">
+                <span className="px-1.5 py-0.5 rounded border border-sky-500/40 bg-sky-500/10 text-sky-300 text-[10px] font-medium">D#</span>
+                <span>dense rank</span>
+                <span className="px-1.5 py-0.5 rounded border border-amber-500/40 bg-amber-500/10 text-amber-300 text-[10px] font-medium">S#</span>
+                <span>sparse rank</span>
+              </span>
+            )}
+          </div>
 
           {genreOptions.length > 0 && !error && data && (
             <div className="flex flex-wrap gap-2">

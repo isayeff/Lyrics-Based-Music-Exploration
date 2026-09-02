@@ -32,8 +32,13 @@ export function PlayButton({ spotifyId, title }) {
   )
 }
 
-/* oEmbed iframe player for the song detail page. */
-export function SpotifyEmbed({ spotifyId }) {
+/* oEmbed iframe player for the song detail page.
+ *
+ * `autoplay` is requested when the user arrived by pressing play on a result
+ * row. Browsers block sound-on autoplay without a direct user gesture in the
+ * destination document, so Spotify may still require one more click — the
+ * parameter is a request, not a guarantee, and the player is visible either way. */
+export function SpotifyEmbed({ spotifyId, autoplay = false }) {
   if (!spotifyId) {
     return (
       <div className="rounded-lg border border-border bg-surface p-4 text-sm text-muted">
@@ -41,15 +46,15 @@ export function SpotifyEmbed({ spotifyId }) {
       </div>
     )
   }
+  const src = `https://open.spotify.com/embed/track/${spotifyId}${autoplay ? '?autoplay=1' : ''}`
   return (
     <iframe
       title="Spotify player"
-      src={`https://open.spotify.com/embed/track/${spotifyId}`}
+      src={src}
       width="100%"
       height="152"
       frameBorder="0"
       allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-      loading="lazy"
       className="rounded-lg"
     />
   )

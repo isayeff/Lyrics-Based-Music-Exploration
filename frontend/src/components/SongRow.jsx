@@ -1,29 +1,34 @@
 import { useNavigate } from 'react-router-dom'
 import Artwork from './Artwork'
-import { PlayButton } from './Spotify'
+import { RankBadge, RetrieverBadges } from './Rank'
 
 /* Row-based result item (dense list, not cards). Hover lifts the surface —
-   no red on hover; accent is reserved for interactive/active state. */
-export default function SongRow({ song, art, showScore = true }) {
+   no red on hover; accent is reserved for interactive/active state.
+
+   Play sends the user to our own song detail page with autoplay requested,
+   rather than leaving for Spotify. The artwork itself still links out to the
+   track on Spotify, which is what their display terms require. */
+export default function SongRow({ song, art, showRank = true }) {
   const navigate = useNavigate()
   const genres = song.genres || []
+
+  const open = (autoplay = false) =>
+    navigate(`/song/${song.song_id}${autoplay ? '?play=1' : ''}`)
 
   return (
     <div
       role="button"
       tabIndex={0}
-      onClick={() => navigate(`/song/${song.song_id}`)}
+      onClick={() => open(false)}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault()
-          navigate(`/song/${song.song_id}`)
+          open(false)
         }
       }}
-      className="group flex items-center gap-3 px-3 py-2.5 border-b border-border hover:bg-surfaceHover transition cursor-pointer"
+      className="group flex items-center gap-3 px-3 py-2.5 border-b border-border last:border-b-0 hover:bg-surfaceHover transition cursor-pointer"
     >
-      {song.rank != null && (
-        <span className="w-6 shrink-0 text-right text-xs text-muted tabular-nums">{song.rank}</span>
-      )}
+      {showRank && <RankBadge rank={song.rank} />}
 
       <Artwork songId={song.song_id} art={art} size={48} title={song.title} />
 
@@ -36,26 +41,20 @@ export default function SongRow({ song, art, showScore = true }) {
         </p>
       </div>
 
-      {showScore && song.score != null && (
-        <span
-          className="shrink-0 text-xs text-muted tabular-nums"
-          title={retrieverTitle(song.retrievers)}
-        >
-          {formatScore(song.score)}
-        </span>
-      )}
+      {showRank && <RetrieverBadges retrievers={song.retrievers} />}
 
-      <PlayButton spotifyId={song.spotify_id} title={song.title} />
+      <button
+        type="button"
+        onClick={(e) => { e.stopPropagation(); open(true) }}
+        title={`Play ${song.title}`}
+        className="shrink-0 grid place-items-center w-9 h-9 rounded-full text-accent
+          hover:text-accentHover hover:bg-bg/60 transition opacity-70 group-hover:opacity-100"
+      >
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+          <path d="M8 5v14l11-7z" />
+        </svg>
+        <span className="sr-only">Play {song.title}</span>
+      </button>
     </div>
   )
-}
-
-function formatScore(score) {
-  return score >= 1 ? score.toFixed(1) : score.toFixed(3)
-}
-
-function retrieverTitle(retrievers) {
-  if (!retrievers) return undefined
-  const parts = Object.entries(retrievers).map(([name, rank]) => `${name} #${rank}`)
-  return parts.length ? `Matched by ${parts.join(', ')}` : undefined
 }

@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import SongRow from '../components/SongRow'
+import GenreTile from '../components/GenreTile'
 import { TileSkeleton, SongListSkeleton, EmptyState, ErrorState } from '../components/States'
 import { SpotifyLogo } from '../components/Spotify'
 import useArtwork from '../useArtwork'
+import useGenreArt from '../useGenreArt'
 import { getGenres, getGenreSongs } from '../api'
 
 export function GenreList() {
@@ -15,11 +17,13 @@ export function GenreList() {
     let cancelled = false
     setGenres(null)
     setError(null)
-    getGenres(60)
+    getGenres(24)
       .then((data) => { if (!cancelled) setGenres(data.genres) })
       .catch((err) => { if (!cancelled) setError(err.message) })
     return () => { cancelled = true }
   }, [reloadKey])
+
+  const genreArt = useGenreArt((genres || []).map((g) => g.genre))
 
   return (
     <div className="space-y-4">
@@ -32,18 +36,19 @@ export function GenreList() {
       ) : genres.length === 0 ? (
         <EmptyState title="No genres" hint="The catalogue has no genre data loaded." />
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-          {genres.map((g) => (
-            <Link
-              key={g.genre}
-              to={`/genres/${encodeURIComponent(g.genre)}`}
-              className="rounded-lg border border-border bg-surface hover:bg-surfaceHover transition p-3.5"
-            >
-              <p className="text-sm font-medium capitalize truncate">{g.genre}</p>
-              <p className="text-xs text-muted mt-0.5">{g.count.toLocaleString()} songs</p>
-            </Link>
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+            {genres.map((g) => (
+              <GenreTile
+                key={g.genre}
+                genre={g.genre}
+                count={g.count}
+                images={genreArt[g.genre] || []}
+              />
+            ))}
+          </div>
+          <SpotifyLogo />
+        </>
       )}
     </div>
   )
@@ -84,7 +89,7 @@ export function GenreDetail() {
         <>
           <div className="rounded-lg border border-border overflow-hidden bg-surface">
             {songs.map((song) => (
-              <SongRow key={song.song_id} song={song} art={art[song.song_id]} showScore={false} />
+              <SongRow key={song.song_id} song={song} art={art[song.song_id]} showRank={false} />
             ))}
           </div>
           <SpotifyLogo />

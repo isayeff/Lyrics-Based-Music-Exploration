@@ -3,7 +3,7 @@ import time
 import logging
 from typing import Literal
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Header
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from sqlalchemy import create_engine, text
@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 
 import retrieval
 import spotify
+import auth as auth_lib
 
 load_dotenv()
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
@@ -40,6 +41,8 @@ def load_corpus_stats():
     with engine.connect() as conn:
         TERM_DF.update(retrieval.load_term_df(conn))
     log.info("loaded %d corpus lexemes in %.2fs", len(TERM_DF), time.perf_counter() - t0)
+    auth_lib.init_schema(engine)
+    log.info("auth schema ready")
     if not spotify.credentials_configured():
         log.warning(
             "SPOTIFY_CLIENT_ID/SECRET not set — /artwork returns empty and the UI "
@@ -161,6 +164,51 @@ def genres(limit: int = 200):
     return {"count": len(rows), "genres": [{"genre": r.genre, "count": r.count} for r in rows]}
 
 
+@app.get("/genre-art")
+def genre_art(genres: str, per_genre: int = 4):
+    """Representative album art per genre, for the browse tiles.
+
+    Returns up to `per_genre` artwork urls for each requested genre. The UI lays
+    them out as a mosaic with the genre label *outside* the images: Spotify's
+    terms forbid drawing text over their artwork (D34).
+    """
+    names = [g for g in (n.strip() for n in genres.split(",")) if g][:24]
+    if not names:
+        return {"genre_art": {}}
+
+    with engine.connect() as conn:
+        rows = conn.execute(
+            text("""
+                SELECT genre, id FROM (
+                    SELECT trim(g) AS genre, song.id,
+                           row_number() OVER (PARTITION BY trim(g) ORDER BY song.id) AS rn
+                    FROM song, unnest(string_to_array(song.genres, ',')) AS g
+                    WHERE song.spotify_id IS NOT NULL AND trim(g) = ANY(:names)
+                ) ranked
+                WHERE rn <= :per
+            """),
+            {"names": names, "per": per_genre},
+        ).fetchall()
+
+    by_genre = {}
+    for r in rows:
+        by_genre.setdefault(r.genre, []).append(r.id)
+
+    song_ids = [sid for ids in by_genre.values() for sid in ids]
+    with engine.connect() as conn:
+        meta = conn.execute(
+            text("SELECT id, spotify_id FROM song WHERE id = ANY(:ids)"), {"ids": song_ids}
+        ).fetchall()
+
+    art = spotify.get_artwork({m.id: m.spotify_id for m in meta})
+    out = {
+        genre: [art[sid]["url"] for sid in ids if sid in art]
+        for genre, ids in by_genre.items()
+    }
+    log.info("genre-art requested=%d resolved=%d", len(names), sum(1 for v in out.values() if v))
+    return {"genre_art": out}
+
+
 @app.get("/genre/{genre}")
 def songs_by_genre(genre: str, limit: int = 50):
     with engine.connect() as conn:
@@ -210,3 +258,149 @@ def split_list(value):
     if not value:
         return []
     return [part.strip() for part in value.split(",") if part.strip()]
+
+
+# --- authentication (D25: fabricated test accounts only, no real personal data) ---
+
+# Plain format check rather than pydantic's EmailStr: accounts here are
+# fabricated test accounts by design (D25), and EmailStr rejects reserved test
+# domains like .local / .test, which is exactly what we want people to use.
+EMAIL_PATTERN = r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
+
+
+class SignupBody(BaseModel):
+    email: str = Field(pattern=EMAIL_PATTERN)
+    password: str = Field(min_length=8)
+    taste_genres: list[str] = []
+
+
+class LoginBody(BaseModel):
+    email: str = Field(pattern=EMAIL_PATTERN)
+    password: str
+
+
+class TasteBody(BaseModel):
+    taste_genres: list[str]
+
+
+def current_user(authorization: str | None):
+    """Resolves a Bearer token to a user row, or None."""
+    if not authorization or not authorization.lower().startswith("bearer "):
+        return None
+    payload = auth_lib.decode_token(authorization.split(" ", 1)[1].strip())
+    if not payload:
+        return None
+    with engine.connect() as conn:
+        return auth_lib.get_user(conn, int(payload["sub"]))
+
+
+def require_user(authorization: str | None):
+    user = current_user(authorization)
+    if user is None:
+        raise HTTPException(status_code=401, detail="not authenticated")
+    return user
+
+
+def user_payload(row, token=None):
+    out = {"id": row.id, "email": row.email, "taste_genres": list(row.taste_genres or [])}
+    if token:
+        out["token"] = token
+    return out
+
+
+@app.post("/auth/signup")
+def signup(body: SignupBody):
+    email = body.email.strip().lower()
+    with engine.begin() as conn:
+        if auth_lib.get_user_by_email(conn, email):
+            raise HTTPException(status_code=409, detail="an account with that email already exists")
+        row = auth_lib.create_user(conn, email, body.password, body.taste_genres)
+    log.info("signup id=%s", row.id)
+    return user_payload(row, auth_lib.make_token(row.id, row.email))
+
+
+@app.post("/auth/login")
+def login(body: LoginBody):
+    email = body.email.strip().lower()
+    with engine.connect() as conn:
+        row = auth_lib.get_user_by_email(conn, email)
+    # same message either way: don't reveal whether the email exists
+    if row is None or not auth_lib.verify_password(body.password, row.password_hash):
+        raise HTTPException(status_code=401, detail="incorrect email or password")
+    log.info("login id=%s", row.id)
+    return user_payload(row, auth_lib.make_token(row.id, row.email))
+
+
+@app.get("/auth/me")
+def me(authorization: str | None = Header(default=None)):
+    return user_payload(require_user(authorization))
+
+
+@app.put("/auth/taste")
+def update_taste(body: TasteBody, authorization: str | None = Header(default=None)):
+    user = require_user(authorization)
+    with engine.begin() as conn:
+        auth_lib.set_taste_genres(conn, user.id, body.taste_genres)
+        return user_payload(auth_lib.get_user(conn, user.id))
+
+
+@app.post("/history/{song_id}")
+def add_history(song_id: str, authorization: str | None = Header(default=None)):
+    user = require_user(authorization)
+    with engine.begin() as conn:
+        auth_lib.record_view(conn, user.id, song_id)
+    return {"ok": True}
+
+
+@app.get("/recommendations")
+def recommendations(limit: int = 12, authorization: str | None = Header(default=None)):
+    """Taste-genre songs, excluding anything already viewed, plus recent history.
+
+    Deliberately simple: a genre sample the user has not seen. Anything stronger
+    (collaborative filtering, taste vectors) is further work per D3.
+    """
+    user = require_user(authorization)
+    genres = list(user.taste_genres or [])
+
+    with engine.connect() as conn:
+        viewed = [r.song_id for r in auth_lib.recent_views(conn, user.id, 20)]
+
+        recs = []
+        if genres:
+            rows = conn.execute(
+                text(f"""
+                    SELECT {SONG_FIELDS} FROM song
+                    WHERE genres IS NOT NULL
+                      AND EXISTS (
+                          SELECT 1 FROM unnest(string_to_array(genres, ',')) AS g
+                          WHERE trim(g) = ANY(:genres)
+                      )
+                      AND (CAST(:viewed AS text[]) IS NULL OR NOT (id = ANY(CAST(:viewed AS text[]))))
+                    ORDER BY md5(id)
+                    LIMIT :lim
+                """),
+                {"genres": genres, "viewed": viewed or None, "lim": limit},
+            ).fetchall()
+            recs = [song_summary(r) for r in rows]
+
+        history = []
+        if viewed:
+            rows = conn.execute(
+                text(f"SELECT {SONG_FIELDS} FROM song WHERE id = ANY(:ids)"), {"ids": viewed}
+            ).fetchall()
+            by_id = {r.id: r for r in rows}
+            history = [song_summary(by_id[sid]) for sid in viewed if sid in by_id]
+
+    return {"taste_genres": genres, "recommendations": recs, "recently_viewed": history}
+
+
+def song_summary(row):
+    return {
+        "song_id": row.id,
+        "title": row.song,
+        "artist": row.artist,
+        "album_name": row.album_name,
+        "genres": split_list(row.genres),
+        "spotify_id": row.spotify_id,
+        "lyric_snippet": row.lyric_snippet,
+    }
