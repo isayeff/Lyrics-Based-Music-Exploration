@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import toast from 'react-hot-toast'
 import { useAuth } from '../auth'
 import { getGenres } from '../api'
+import PasswordStrength from '../components/PasswordStrength'
 
 /* Login / signup. Signup includes the taste-onboarding genre picks that feed the
    personalised home (D25). Accounts are fabricated test accounts only — no real
@@ -35,7 +37,9 @@ export default function Login() {
       else await signup(email, password, picked)
       navigate('/')
     } catch (err) {
+      // shown both inline (persistent, next to the form) and as a toast
       setError(err.message)
+      toast.error(err.message)
     } finally {
       setBusy(false)
     }
@@ -76,9 +80,11 @@ export default function Login() {
             id="password"
             type="password"
             value={password}
+            autoComplete={tab === 'signup' ? 'new-password' : 'current-password'}
             onChange={(e) => setPassword(e.target.value)}
             className="w-full rounded-md bg-surface border border-border px-3 py-2 text-sm outline-none focus:border-accent transition"
           />
+          {tab === 'signup' && <PasswordStrength password={password} />}
         </div>
 
         {tab === 'signup' && (

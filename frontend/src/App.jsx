@@ -6,6 +6,9 @@ import Results from './pages/Results'
 import SongDetail from './pages/SongDetail'
 import { GenreList, GenreDetail } from './pages/Genres'
 import Login from './pages/Login'
+import Profile from './pages/Profile'
+import About from './pages/About'
+import Toaster from './components/Toaster'
 import { AuthProvider } from './auth'
 
 const MAX_RECENT = 8
@@ -21,6 +24,7 @@ export default function App() {
 
   return (
     <AuthProvider>
+      <Toaster />
       <BrowserRouter>
         <Routes>
           <Route element={<Layout />}>
@@ -30,6 +34,8 @@ export default function App() {
             <Route path="/genres" element={<GenreList />} />
             <Route path="/genres/:genre" element={<GenreDetail />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/about" element={<About />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>

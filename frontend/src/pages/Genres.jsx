@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import SongRow from '../components/SongRow'
 import GenreTile from '../components/GenreTile'
+import SectionHeader from '../components/SectionHeader'
 import { TileSkeleton, SongListSkeleton, EmptyState, ErrorState } from '../components/States'
 import { SpotifyLogo } from '../components/Spotify'
 import useArtwork from '../useArtwork'
@@ -27,7 +28,10 @@ export function GenreList() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-semibold tracking-tight">Browse genres</h1>
+      <SectionHeader
+        title="Browse genres"
+        subtitle="The 24 largest genres in the catalogue."
+      />
 
       {error ? (
         <ErrorState message={error} onRetry={() => setReloadKey((k) => k + 1)} />

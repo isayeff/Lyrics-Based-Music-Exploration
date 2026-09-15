@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import toast from 'react-hot-toast'
 import * as api from './api'
 
 /* Real JWT auth against Postgres with bcrypt-hashed passwords (D25, D41).
@@ -49,6 +50,7 @@ export function AuthProvider({ children }) {
         writeToken(null)   // expired or invalid
         setToken(null)
         setUser(null)
+        toast('Your session expired — please log in again', { icon: '🔒' })
       })
       .finally(() => { if (!cancelled) setReady(true) })
     return () => { cancelled = true }
@@ -66,22 +68,32 @@ export function AuthProvider({ children }) {
     ready,
 
     async login(email, password) {
-      adopt(await api.login(email.trim(), password))
+      const data = await api.login(email.trim(), password)
+      adopt(data)
+      toast.success(`Welcome back, ${data.email}`)
     },
 
     async signup(email, password, tasteGenres = []) {
-      adopt(await api.signup(email.trim(), password, tasteGenres))
+      const data = await api.signup(email.trim(), password, tasteGenres)
+      adopt(data)
+      toast.success(
+        tasteGenres.length
+          ? `Account created — ${tasteGenres.length} genre${tasteGenres.length === 1 ? '' : 's'} saved`
+          : 'Account created'
+      )
     },
 
     logout() {
       writeToken(null)
       setToken(null)
       setUser(null)
+      toast.success('Signed out')
     },
 
     async setTasteGenres(genres) {
       if (!token) return
       setUser(await api.updateTaste(token, genres))
+      toast.success('Taste updated')
     },
 
     /** Viewed-song history feeds the personalised home (D25). */

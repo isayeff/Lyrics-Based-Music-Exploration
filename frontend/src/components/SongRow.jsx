@@ -47,11 +47,17 @@ export default function SongRow({ song, art, showRank = true }) {
         type="button"
         onClick={(e) => { e.stopPropagation(); open(true) }}
         title={`Play ${song.title}`}
-        className="shrink-0 grid place-items-center w-9 h-9 rounded-full text-accent
-          hover:text-accentHover hover:bg-bg/60 transition opacity-70 group-hover:opacity-100"
+        className="group/play shrink-0 grid place-items-center w-8 h-8 rounded-full bg-accent text-white
+          shadow-[0_0_12px_-5px_rgba(232,0,3,0.8)]
+          hover:bg-accentHover transition-colors duration-150"
       >
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
-          <path d="M8 5v14l11-7z" />
+        {/* Triangle drawn with its bounding box centred at x=12.75 rather than the
+            usual x=13.5, so it sits optically centred in the circle without a nudge.
+            Only the icon animates — the button itself stays a fixed size. */}
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"
+             className="transition-transform duration-150 group-hover/play:scale-110"
+             aria-hidden="true">
+          <path d="M9 6.5v11l7.5-5.5z" />
         </svg>
         <span className="sr-only">Play {song.title}</span>
       </button>

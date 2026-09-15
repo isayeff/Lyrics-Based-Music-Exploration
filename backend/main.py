@@ -181,7 +181,14 @@ def genre_art(genres: str, per_genre: int = 4):
             text("""
                 SELECT genre, id FROM (
                     SELECT trim(g) AS genre, song.id,
-                           row_number() OVER (PARTITION BY trim(g) ORDER BY song.id) AS rn
+                           row_number() OVER (
+                               PARTITION BY trim(g)
+                               -- hash on (genre, id) so each genre draws a
+                               -- different pseudo-random sample: ordering by id
+                               -- alone gave neighbouring genres the same covers,
+                               -- since one song belongs to several genres
+                               ORDER BY md5(trim(g) || song.id)
+                           ) AS rn
                     FROM song, unnest(string_to_array(song.genres, ',')) AS g
                     WHERE song.spotify_id IS NOT NULL AND trim(g) = ANY(:names)
                 ) ranked

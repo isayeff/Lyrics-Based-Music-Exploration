@@ -6,9 +6,21 @@
  * fusion legible: "dense #1 + sparse #21 -> fused #1". */
 
 const MEDALS = {
-  1: { fill: '#D4AF37', ring: '#8C6F1F', label: 'Best match' },
-  2: { fill: '#B8BCC4', ring: '#7C8189', label: '2nd best match' },
-  3: { fill: '#C2703F', ring: '#8B5A2B', label: '3rd best match' },
+  1: {
+    label: 'Best match',
+    face: '#F4D03F', faceDark: '#C9971B', edge: '#8A6A12', text: '#4A3708',
+    glow: 'rgba(244, 208, 63, 0.35)',
+  },
+  2: {
+    label: '2nd best match',
+    face: '#D8DDE4', faceDark: '#A3AAB4', edge: '#6F757E', text: '#3A3E44',
+    glow: 'rgba(216, 221, 228, 0.28)',
+  },
+  3: {
+    label: '3rd best match',
+    face: '#E0955E', faceDark: '#B06A34', edge: '#7A4620', text: '#432408',
+    glow: 'rgba(224, 149, 94, 0.28)',
+  },
 }
 
 export function RankBadge({ rank }) {
@@ -17,24 +29,43 @@ export function RankBadge({ rank }) {
   const medal = MEDALS[rank]
   if (!medal) {
     return (
-      <span className="w-7 shrink-0 text-center text-xs text-muted tabular-nums">
+      <span className="w-8 shrink-0 text-center text-[13px] text-muted/70 tabular-nums font-medium">
         {rank}
       </span>
     )
   }
 
+  const gid = `medal${rank}`
   return (
     <span
-      className="w-7 shrink-0 grid place-items-center"
+      className="w-8 shrink-0 grid place-items-center"
       title={medal.label}
-      aria-label={medal.label}
+      aria-label={`${medal.label}, rank ${rank}`}
     >
-      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-        <circle cx="12" cy="12" r="9" fill={medal.fill} stroke={medal.ring} strokeWidth="1.5" />
-        <text
-          x="12" y="12" textAnchor="middle" dominantBaseline="central"
-          fontSize="10" fontWeight="700" fill="#0A0A0B"
-        >
+      <svg viewBox="0 0 28 28" width="26" height="26" aria-hidden="true"
+           style={{ filter: `drop-shadow(0 0 5px ${medal.glow})` }}>
+        <defs>
+          <linearGradient id={gid} x1="0" y1="0" x2="0.35" y2="1">
+            <stop offset="0%" stopColor={medal.face} />
+            <stop offset="55%" stopColor={medal.face} />
+            <stop offset="100%" stopColor={medal.faceDark} />
+          </linearGradient>
+        </defs>
+
+        {/* ribbon tails behind the disc */}
+        <path d="M9.5 17.5 L6.5 26 L10.6 23.6 L12.6 26.5 L14.4 19.5 Z" fill={medal.faceDark} opacity="0.85" />
+        <path d="M18.5 17.5 L21.5 26 L17.4 23.6 L15.4 26.5 L13.6 19.5 Z" fill={medal.edge} opacity="0.85" />
+
+        <circle cx="14" cy="12" r="9.4" fill={medal.edge} />
+        <circle cx="14" cy="12" r="8.4" fill={`url(#${gid})`} />
+        {/* inner bevel ring */}
+        <circle cx="14" cy="12" r="6.6" fill="none" stroke={medal.edge} strokeOpacity="0.35" strokeWidth="0.9" />
+        {/* highlight */}
+        <ellipse cx="11.2" cy="8.4" rx="3.1" ry="2.1" fill="#fff" opacity="0.32" />
+
+        <text x="14" y="12.4" textAnchor="middle" dominantBaseline="central"
+              fontSize="9.5" fontWeight="800" fill={medal.text}
+              fontFamily="ui-sans-serif, system-ui, sans-serif">
           {rank}
         </text>
       </svg>

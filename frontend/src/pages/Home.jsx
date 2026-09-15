@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import SearchBar from "../components/SearchBar";
 import GenreTile from "../components/GenreTile";
+import SectionHeader from "../components/SectionHeader";
 import { TileSkeleton, ErrorState } from "../components/States";
 import { getGenres } from "../api";
 import { useAuth } from "../auth";
@@ -76,16 +77,13 @@ export default function Home({ recent, onSearch }) {
 
       {user && <PersonalisedHome onSearch={runSearch} />}
 
-      <section className="space-y-3">
-        <div className="flex items-baseline justify-between">
-          <h2 className="text-sm font-medium">Browse by genre</h2>
-          <Link
-            to="/genres"
-            className="text-xs text-muted hover:text-text transition"
-          >
-            See all
-          </Link>
-        </div>
+      <section className="space-y-4">
+        <SectionHeader
+          title="Browse by genre"
+          subtitle="Not sure how to describe it? Start from a sound you already like."
+          actionLabel="See all genres"
+          actionTo="/genres"
+        />
 
         {error ? (
           <ErrorState
