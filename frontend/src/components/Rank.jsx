@@ -1,9 +1,5 @@
-/* Rank presentation for result rows.
- *
- * Raw fusion scores (0.0164...) are meaningless to a user, so the list leads
- * with position instead. The top three get medals, and each row shows which
- * retriever(s) found it and at what rank — which is what makes the hybrid
- * fusion legible: "dense #1 + sparse #21 -> fused #1". */
+// Rank medals for the top three, and D#/S# badges showing which retriever
+// found each result and at what rank.
 
 const MEDALS = {
   1: {
@@ -74,16 +70,16 @@ export function RankBadge({ rank }) {
 }
 
 /* Dense and sparse are visually distinct so the user can tell which arm of the
-   system produced a hit — dense = semantic match, sparse = literal word match. */
+   system produced a hit - dense = semantic match, sparse = literal word match. */
 const RETRIEVER_STYLE = {
   dense: {
     className: 'border-sky-500/40 bg-sky-500/10 text-sky-300',
-    title: 'Dense retrieval (SBERT embeddings) — matched on meaning',
+    title: 'Dense retrieval (SBERT embeddings) - matched on meaning',
     short: 'D',
   },
   sparse: {
     className: 'border-amber-500/40 bg-amber-500/10 text-amber-300',
-    title: 'Sparse retrieval (Postgres full-text) — matched on literal words',
+    title: 'Sparse retrieval (Postgres full-text) - matched on literal words',
     short: 'S',
   },
 }
@@ -110,7 +106,7 @@ export function RetrieverBadges({ retrievers }) {
       {entries.length > 1 && (
         <span
           className="px-1.5 py-0.5 rounded border border-accent/40 bg-accent/10 text-accent text-[10px] font-medium"
-          title="Found by both retrievers — Reciprocal Rank Fusion ranked it higher for agreeing"
+          title="Found by both retrievers - Reciprocal Rank Fusion ranked it higher for agreeing"
         >
           both
         </span>

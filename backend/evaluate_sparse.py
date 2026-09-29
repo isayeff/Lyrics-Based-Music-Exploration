@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 from sqlalchemy import create_engine, text
 from tqdm import tqdm
 
-import retrieval  # shared dense/sparse/RRF logic — single source of truth (D31, D36)
+import retrieval  # shared dense/sparse/RRF logic - single source of truth (D31, D36)
 
 load_dotenv()
 engine = create_engine(os.environ["DATABASE_URL"])
@@ -47,7 +47,7 @@ print(f"{len(term_df)} distinct lexemes in corpus")
 
 def sparse_search_ids(conn, query_text, k=TOP_K):
     """Delegates to the shared retriever so the harness and the /search endpoint
-    rank identically — a demo that does not match the reported numbers is exactly
+    rank identically - a demo that does not match the reported numbers is exactly
     what sharing this prevents (D36)."""
     return [sid for sid, _ in retrieval.sparse_search(conn, query_text, k, term_df)]
 

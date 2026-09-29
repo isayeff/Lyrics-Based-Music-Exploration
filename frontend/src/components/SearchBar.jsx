@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 
-/* Explicit submit only — never search-as-you-type. Recent searches (held in
+/* Explicit submit only - never search-as-you-type. Recent searches (held in
    React state, see App.jsx) drop down on focus. */
 export default function SearchBar({ initialValue = '', recent = [], onSubmit, autoFocus = false, size = 'md' }) {
   const [value, setValue] = useState(initialValue)

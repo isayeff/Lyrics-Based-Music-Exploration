@@ -1,9 +1,7 @@
-"""Spotify Web API album art via client-credentials (app-only token, no user login — D6).
+"""Album art from Spotify (client-credentials token, no user login).
 
-Artwork is fetched only for tracks actually being rendered and held in an in-memory
-TTL cache; nothing is written to Postgres. If credentials are absent or a call
-fails, callers get no entry for that song and the UI falls back to its own
-deterministic colour block (never a broken image, never a third-party placeholder).
+Only fetched for songs being shown, cached in memory, never stored in the DB.
+Missing art just means no entry; the frontend draws a colour block instead.
 """
 import os
 import time
@@ -26,18 +24,12 @@ MAX_WORKERS = 3       # parallelism for the per-track fallback (Spotify rate-lim
 _token = {"value": None, "expires_at": 0}
 _art_cache = {}  # song_id -> (expires_at, {"url":..., "spotify_url":...} | None)
 
-# Spotify returns 403 on the *batch* GET /v1/tracks?ids= endpoint for newly
-# created apps, while the single GET /v1/tracks/{id} endpoint works fine on the
-# same client-credentials token. We prefer batching (1 call per 50 tracks) and
-# latch to concurrent per-track fetches the first time a batch is refused, so
-# this upgrades itself automatically if the app is later granted batch access.
+# Batch /tracks?ids= returns 403 for new apps, single /tracks/{id} works (D35).
+# Set on the first 403, then fetch tracks one by one.
 _batch_blocked = False
 
-# The Web API quota is per-account and, once exhausted, returns 429
-# QUOTA_EXCEEDED for many hours — creating another app does not reset it.
-# Spotify's oEmbed endpoint needs no authentication and no quota, and returns
-# the same official album art, so it is used as the fallback source. Once the
-# API starts answering again this flips back automatically.
+# Quota errors (429 with a long Retry-After) last for hours, so switch to the
+# oEmbed endpoint, which needs no token.
 _api_quota_exhausted = False
 
 
@@ -67,7 +59,7 @@ def _get_token():
 
 
 def _cached(song_id):
-    """(is_fresh, art) — distinguishes 'not cached / expired' from 'known to have none'."""
+    """(is_fresh, art) - distinguishes 'not cached / expired' from 'known to have none'."""
     entry = _art_cache.get(song_id)
     if entry and time.time() < entry[0]:
         return True, entry[1]
@@ -90,7 +82,7 @@ def get_artwork(song_to_spotify):
         if fresh:
             if art:
                 out[song_id] = art
-            # a fresh negative entry means "recently tried and failed" — skip it
+            # a fresh negative entry means "recently tried and failed" - skip it
         else:
             # never fetched, or the entry has expired: try again
             pending[song_id] = spotify_id
@@ -140,7 +132,7 @@ def _art_from_track(track, spotify_id):
 
 
 def _fetch_tracks(spotify_ids, token):
-    """{spotify_id: art|None} — batch where allowed, else concurrent single fetches."""
+    """{spotify_id: art|None} - batch where allowed, else concurrent single fetches."""
     global _batch_blocked
     headers = {"Authorization": f"Bearer {token}"}
     resolved = {}
@@ -169,7 +161,7 @@ def _fetch_tracks(spotify_ids, token):
         spotify_ids = remaining + [s for s in spotify_ids if s not in resolved and s not in remaining]
 
     def fetch_via_oembed(spotify_id):
-        """Unauthenticated fallback — no quota. Returns art or None."""
+        """Unauthenticated fallback - no quota. Returns art or None."""
         try:
             resp = requests.get(
                 OEMBED_URL,

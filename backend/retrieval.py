@@ -1,8 +1,5 @@
-"""Shared retrieval logic: dense (pgvector), sparse (Postgres FTS), hybrid (RRF).
-
-Single source of truth for fusion — `evaluate_hybrid.py` imports `rrf_fuse` from
-here so the API and the offline evaluation cannot drift apart (D30).
-"""
+"""Dense, sparse and hybrid retrieval. Shared by the API and the evaluation
+scripts so both rank the same way (D31)."""
 from collections import defaultdict
 from sqlalchemy import text
 
@@ -11,18 +8,10 @@ FUSION_DEPTH = 50   # each retriever contributes its top-50 (D30)
 PROBES = 100        # ivfflat.probes, matches evaluate.py
 MAX_QUERY_LEXEMES = 20  # rarest-lexeme filter, matches evaluate_sparse.py (D26)
 
-# ts_rank_cd weights as {D, C, B, A}; A = artist+title, B = lyric body (D26).
-# Postgres' default {0.1, 0.2, 0.4, 1.0} makes a title hit worth only 2.5x a
-# lyric hit, so repeated lyric mentions swamp exact title/artist matches: the
-# query "eminem killshot" ranked "Brainless" (artist name repeated 9x in its
-# lyrics) above "KILLSHOT" itself. Widening the A:B gap fixes that (D36).
+# ts_rank_cd weights {D, C, B, A}: A = artist/title, B = lyrics. The default
+# weights let repeated lyric words beat an exact title match (D36).
 RANK_WEIGHTS = [0.02, 0.05, 0.05, 1.0]
-# Normalisation flag. 1 = divide by 1 + log(document length): a gentle length
-# correction, chosen on measurement (D36) — it wins on both the short known-item
-# queries and a 300-query sample of the long interpretation queries.
-# Flag 2 (divide by raw length) is actively harmful here: it over-penalises long
-# lyric bodies and pushed KILLSHOT to rank 12. Flag 16 scored worst of the
-# candidates on the interpretation sample (nDCG@10 0.032 vs 0.040 for flag 1).
+# 1 = divide by 1 + log(length). Picked from the sweep in D36; flag 2 was worse.
 RANK_NORMALIZATION = 1
 
 
@@ -73,7 +62,7 @@ def dense_search(conn, query_vec, limit):
 
 
 def build_or_tsquery(conn, query_text, term_df):
-    """OR of the query's rarest lexemes — see D26/D27 for why not plainto_tsquery."""
+    """OR of the query's rarest lexemes - see D26/D27 for why not plainto_tsquery."""
     lexemes = conn.execute(
         text("SELECT tsvector_to_array(to_tsvector('english', :t))"), {"t": query_text}
     ).scalar()

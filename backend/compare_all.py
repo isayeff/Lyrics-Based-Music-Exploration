@@ -17,7 +17,7 @@ SYSTEMS = [
 table = {}
 for name, path in SYSTEMS:
     if not os.path.exists(path):
-        print(f"  (missing: {path} — skipped)")
+        print(f"  (missing: {path} - skipped)")
         continue
     with open(path, encoding="utf-8") as f:
         data = json.load(f)

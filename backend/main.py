@@ -45,7 +45,7 @@ def load_corpus_stats():
     log.info("auth schema ready")
     if not spotify.credentials_configured():
         log.warning(
-            "SPOTIFY_CLIENT_ID/SECRET not set — /artwork returns empty and the UI "
+            "SPOTIFY_CLIENT_ID/SECRET not set - /artwork returns empty and the UI "
             "falls back to deterministic colour blocks"
         )
 
@@ -166,12 +166,7 @@ def genres(limit: int = 200):
 
 @app.get("/genre-art")
 def genre_art(genres: str, per_genre: int = 4):
-    """Representative album art per genre, for the browse tiles.
-
-    Returns up to `per_genre` artwork urls for each requested genre. The UI lays
-    them out as a mosaic with the genre label *outside* the images: Spotify's
-    terms forbid drawing text over their artwork (D34).
-    """
+    """Up to `per_genre` cover urls per genre, for the genre tiles."""
     names = [g for g in (n.strip() for n in genres.split(",")) if g][:24]
     if not names:
         return {"genre_art": {}}
@@ -361,11 +356,7 @@ def add_history(song_id: str, authorization: str | None = Header(default=None)):
 
 @app.get("/recommendations")
 def recommendations(limit: int = 12, authorization: str | None = Header(default=None)):
-    """Taste-genre songs, excluding anything already viewed, plus recent history.
-
-    Deliberately simple: a genre sample the user has not seen. Anything stronger
-    (collaborative filtering, taste vectors) is further work per D3.
-    """
+    """Songs from the user's taste genres they haven't opened yet, plus history."""
     user = require_user(authorization)
     genres = list(user.taste_genres or [])
 

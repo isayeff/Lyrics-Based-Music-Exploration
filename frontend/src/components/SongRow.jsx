@@ -2,12 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import Artwork from './Artwork'
 import { RankBadge, RetrieverBadges } from './Rank'
 
-/* Row-based result item (dense list, not cards). Hover lifts the surface —
-   no red on hover; accent is reserved for interactive/active state.
-
-   Play sends the user to our own song detail page with autoplay requested,
-   rather than leaving for Spotify. The artwork itself still links out to the
-   track on Spotify, which is what their display terms require. */
+// One result row. Play opens our song page with autoplay; the cover links to Spotify.
 export default function SongRow({ song, art, showRank = true }) {
   const navigate = useNavigate()
   const genres = song.genres || []
@@ -53,7 +48,7 @@ export default function SongRow({ song, art, showRank = true }) {
       >
         {/* Triangle drawn with its bounding box centred at x=12.75 rather than the
             usual x=13.5, so it sits optically centred in the circle without a nudge.
-            Only the icon animates — the button itself stays a fixed size. */}
+            Only the icon animates - the button itself stays a fixed size. */}
         <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"
              className="transition-transform duration-150 group-hover/play:scale-110"
              aria-hidden="true">

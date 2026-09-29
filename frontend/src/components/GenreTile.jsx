@@ -1,9 +1,6 @@
 import { Link } from 'react-router-dom'
 
-/* Genre card = 2x2 mosaic of unmodified album covers, label BELOW the images.
- * Spotify's terms forbid text, logos or gradients drawn over their artwork
- * (D34), so nothing is ever overlaid. Falls back to deterministic colour
- * blocks derived from the genre name when artwork is unavailable. */
+// 2x2 cover mosaic with the label underneath, not on top (Spotify terms, D34).
 
 function hueFrom(str) {
   let hash = 0

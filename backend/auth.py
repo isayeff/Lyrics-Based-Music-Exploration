@@ -1,9 +1,5 @@
-"""Authentication: Postgres-backed accounts, bcrypt password hashes, JWT sessions.
-
-Per D25 this is populated with fabricated test accounts only — no real personal
-data — so the ethics self-declaration (D23) is unaffected. Passwords are never
-stored or logged in plaintext; only the bcrypt hash is persisted.
-"""
+"""Accounts in Postgres, bcrypt password hashes, JWT sessions.
+Test accounts only (D25)."""
 import os
 import time
 import logging
@@ -38,7 +34,7 @@ def jwt_secret():
     """Dev fallback keeps the app runnable without config; production must set it."""
     secret = os.environ.get("JWT_SECRET")
     if not secret:
-        log.warning("JWT_SECRET not set — using an insecure development default")
+        log.warning("JWT_SECRET not set - using an insecure development default")
         return "dev-only-insecure-secret-change-me"
     return secret
 

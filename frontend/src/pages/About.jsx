@@ -33,7 +33,7 @@ export default function About() {
           Find a song by describing it
         </h1>
         <p className="text-muted text-sm leading-relaxed">
-          Most music search assumes you already know what you are looking for — a title, an
+          Most music search assumes you already know what you are looking for - a title, an
           artist, a lyric you can quote. This system is built for the opposite case: you
           remember what a song was <em>about</em>, and nothing else. Describe it in your own
           words and it searches 84,103 songs by meaning rather than by keyword.
@@ -57,7 +57,7 @@ export default function About() {
           ))}
         </div>
         <p className="text-xs text-muted">
-          On a results page each row shows which retriever found the song and at what position —
+          On a results page each row shows which retriever found the song and at what position -
           so <span className="text-sky-300">D#1</span> plus{' '}
           <span className="text-amber-300">S#21</span> means dense ranked it first, sparse ranked
           it twenty-first, and fusion decided the final order.
@@ -78,7 +78,7 @@ export default function About() {
             <dt className="font-medium">Lyrics</dt>
             <dd className="text-xs text-muted mt-1 leading-relaxed">
               Used to build the search index only. Full lyrics are never stored in the database
-              or displayed — you see a short opening snippet and a link to the licensed source.
+              or displayed - you see a short opening snippet and a link to the licensed source.
             </dd>
           </div>
           <div className="rounded-xl border border-border bg-surface p-4">
@@ -103,7 +103,7 @@ export default function About() {
         <p className="text-muted text-sm leading-relaxed">
           20,672 real fan-written song interpretations were used as search queries, with the song
           each one describes as the correct answer. Retrieval is scored on how often the right
-          song appears near the top — Recall@1, Recall@10, MRR and nDCG@10. Hybrid retrieval
+          song appears near the top - Recall@1, Recall@10, MRR and nDCG@10. Hybrid retrieval
           currently scores highest, ahead of dense alone and well ahead of keyword search.
         </p>
         <p className="text-xs text-muted">

@@ -17,7 +17,7 @@ TESTS = {
                                              "BqgP6zIxmViq4NRR"]),
 }
 
-# {D,C,B,A} — B is the lyric body, A is artist+title
+# {D,C,B,A} - B is the lyric body, A is artist+title
 WEIGHT_SETS = {
     "default {0.1,0.2,0.4,1.0}": [0.1, 0.2, 0.4, 1.0],
     "B=0.10": [0.02, 0.05, 0.10, 1.0],

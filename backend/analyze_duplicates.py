@@ -1,7 +1,7 @@
 """Quantify near-duplicate song records and how many evaluation songs they affect.
 
 If the ground-truth song_id sits in a duplicate group and retrieval returns its
-twin, the harness scores a miss — so duplicates may be depressing the reported
+twin, the harness scores a miss - so duplicates may be depressing the reported
 numbers for all three retrievers.
 """
 import os

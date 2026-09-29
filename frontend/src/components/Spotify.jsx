@@ -12,32 +12,8 @@ export function SpotifyLogo({ className = '' }) {
   )
 }
 
-/* Play affordance sits BESIDE the artwork, never on top of it. */
-export function PlayButton({ spotifyId, title }) {
-  if (!spotifyId) return null
-  return (
-    <a
-      href={`https://open.spotify.com/track/${spotifyId}`}
-      target="_blank"
-      rel="noopener noreferrer"
-      onClick={(e) => e.stopPropagation()}
-      title={title ? `Play ${title} on Spotify` : 'Play on Spotify'}
-      className="shrink-0 grid place-items-center w-8 h-8 rounded-full text-accent hover:text-accentHover hover:bg-surfaceHover transition"
-    >
-      <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">
-        <path d="M8 5v14l11-7z" />
-      </svg>
-      <span className="sr-only">Play on Spotify</span>
-    </a>
-  )
-}
-
-/* oEmbed iframe player for the song detail page.
- *
- * `autoplay` is requested when the user arrived by pressing play on a result
- * row. Browsers block sound-on autoplay without a direct user gesture in the
- * destination document, so Spotify may still require one more click — the
- * parameter is a request, not a guarantee, and the player is visible either way. */
+// Embedded player. Browsers may still block autoplay, so the user might need
+// to press play once.
 export function SpotifyEmbed({ spotifyId, autoplay = false }) {
   if (!spotifyId) {
     return (

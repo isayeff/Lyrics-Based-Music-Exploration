@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { getArtwork } from './api'
 
-/* Fetches artwork for exactly the songs passed in — the ones being rendered.
+/* Fetches artwork for exactly the songs passed in - the ones being rendered.
    Never backfills the corpus. Failures resolve to no artwork, and the UI falls
    back to its deterministic colour block. */
 export default function useArtwork(songs) {

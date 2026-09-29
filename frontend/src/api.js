@@ -8,7 +8,7 @@ async function request(path, options) {
       const body = await res.json()
       if (body?.detail) detail = typeof body.detail === 'string' ? body.detail : detail
     } catch {
-      // non-JSON error body — keep the status-code message
+      // non-JSON error body - keep the status-code message
     }
     throw new Error(detail)
   }
@@ -35,7 +35,7 @@ export function getGenreSongs(genre, limit = 50) {
   return request(`/genre/${encodeURIComponent(genre)}?limit=${limit}`)
 }
 
-/** Artwork only for songs actually being rendered — never a corpus backfill. */
+/** Artwork only for songs actually being rendered - never a corpus backfill. */
 export function getArtwork(songIds) {
   if (!songIds.length) return Promise.resolve({ artwork: {} })
   return request(`/artwork?ids=${songIds.map(encodeURIComponent).join(',')}`)

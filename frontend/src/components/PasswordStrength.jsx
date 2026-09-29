@@ -1,5 +1,5 @@
 /* Password strength meter: four colour bars plus the single most useful next
-   improvement. Purely advisory feedback — the server independently enforces the
+   improvement. Purely advisory feedback - the server independently enforces the
    8-character minimum, since client-side checks can be bypassed. */
 
 const LEVELS = [

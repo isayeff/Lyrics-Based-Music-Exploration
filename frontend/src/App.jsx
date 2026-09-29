@@ -14,7 +14,7 @@ import { AuthProvider } from './auth'
 const MAX_RECENT = 8
 
 export default function App() {
-  // Recent searches live in React state (not localStorage) — they disappear on
+  // Recent searches live in React state (not localStorage) - they disappear on
   // reload, so no query history is persisted to disk.
   const [recent, setRecent] = useState([])
 

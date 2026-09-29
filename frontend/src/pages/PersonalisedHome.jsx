@@ -6,10 +6,7 @@ import useArtwork from '../useArtwork'
 import { getRecommendations } from '../api'
 import { useAuth } from '../auth'
 
-/* Logged-in home: recommendations from the taste genres picked at signup,
-   excluding songs already viewed, plus recent view history (D25).
-   Recommendations are a genre sample — anything stronger (collaborative
-   filtering, taste vectors) is further work per D3. */
+// Logged-in home: songs from the user's taste genres, plus recently viewed.
 export default function PersonalisedHome({ onSearch }) {
   const { user, token } = useAuth()
 

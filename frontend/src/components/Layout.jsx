@@ -91,23 +91,23 @@ export default function Layout() {
           <div className="space-y-2">
             <p className="text-text font-semibold tracking-tight">NoLyrics.find</p>
             <p className="leading-relaxed">
-              Describe a song in your own words and find it — no title, artist or lyrics needed.
+              Describe a song in your own words and find it - no title, artist or lyrics needed.
               84,103 songs searched by meaning.
             </p>
           </div>
 
           <div className="space-y-2">
             <p className="text-text font-medium">How it works</p>
-            <p><span className="text-sky-300 font-medium">Dense</span> — SBERT embeddings, matched on meaning.</p>
-            <p><span className="text-amber-300 font-medium">Sparse</span> — Postgres full-text, matched on words.</p>
-            <p><span className="text-accent font-medium">Hybrid</span> — both, fused with Reciprocal Rank Fusion.</p>
+            <p><span className="text-sky-300 font-medium">Dense</span> - SBERT embeddings, matched on meaning.</p>
+            <p><span className="text-amber-300 font-medium">Sparse</span> - Postgres full-text, matched on words.</p>
+            <p><span className="text-accent font-medium">Hybrid</span> - both, fused with Reciprocal Rank Fusion.</p>
             <Link to="/about" className="inline-block hover:text-accent transition-colors">Read more →</Link>
           </div>
 
           <div className="space-y-2">
             <p className="text-text font-medium">Data &amp; rights</p>
             <p className="leading-relaxed">
-              Catalogue from the music4all dataset. Lyrics are indexed but never redistributed —
+              Catalogue from the music4all dataset. Lyrics are indexed but never redistributed -
               short snippets only, linking to the licensed source. Album art and playback by Spotify.
             </p>
           </div>

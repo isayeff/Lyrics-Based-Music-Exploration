@@ -1,11 +1,5 @@
-/* Spotify developer terms constrain this component:
- *   - artwork is displayed UNMODIFIED (resize only, never cropped)
- *   - nothing is drawn on top: no overlays, gradients, logos or text
- *   - the play affordance lives BESIDE the artwork (see PlayButton), never on it
- *   - every artwork thumbnail links to the track on Spotify
- * If there is no spotify_id, or the fetch failed, we render a deterministic
- * colour block derived from the song id — never a broken image, never a
- * third-party placeholder. */
+// Spotify terms: show artwork unmodified (no crop, nothing drawn on top) and
+// link it to the track. Falls back to a colour block from the song id.
 
 function hueFromId(songId) {
   let hash = 0

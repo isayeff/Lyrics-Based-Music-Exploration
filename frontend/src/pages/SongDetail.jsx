@@ -57,7 +57,7 @@ export default function SongDetail() {
                 </p>
               </div>
               <p className="text-xs text-muted">
-                Opening lines only. Full lyrics are never stored or displayed — they are used
+                Opening lines only. Full lyrics are never stored or displayed - they are used
                 to build the search index, and the licensed source is a click away on Spotify.
               </p>
             </section>

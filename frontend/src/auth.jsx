@@ -2,13 +2,8 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import toast from 'react-hot-toast'
 import * as api from './api'
 
-/* Real JWT auth against Postgres with bcrypt-hashed passwords (D25, D41).
- *
- * Accounts are fabricated test accounts only — no real personal data — so the
- * ethics self-declaration (D23) is unaffected.
- *
- * The token is kept in sessionStorage rather than localStorage: it survives a
- * page reload during a demo but does not persist after the browser closes. */
+// JWT auth against the backend. Test accounts only (D25).
+// Token lives in sessionStorage so it survives a reload but not closing the browser.
 
 const AuthContext = createContext(null)
 const TOKEN_KEY = 'lyricfind_token'
@@ -26,7 +21,7 @@ function writeToken(token) {
     if (token) sessionStorage.setItem(TOKEN_KEY, token)
     else sessionStorage.removeItem(TOKEN_KEY)
   } catch {
-    // storage unavailable — session simply won't survive reload
+    // storage unavailable - session simply won't survive reload
   }
 }
 
@@ -50,7 +45,7 @@ export function AuthProvider({ children }) {
         writeToken(null)   // expired or invalid
         setToken(null)
         setUser(null)
-        toast('Your session expired — please log in again', { icon: '🔒' })
+        toast('Your session expired - please log in again', { icon: '🔒' })
       })
       .finally(() => { if (!cancelled) setReady(true) })
     return () => { cancelled = true }
@@ -78,7 +73,7 @@ export function AuthProvider({ children }) {
       adopt(data)
       toast.success(
         tasteGenres.length
-          ? `Account created — ${tasteGenres.length} genre${tasteGenres.length === 1 ? '' : 's'} saved`
+          ? `Account created - ${tasteGenres.length} genre${tasteGenres.length === 1 ? '' : 's'} saved`
           : 'Account created'
       )
     },

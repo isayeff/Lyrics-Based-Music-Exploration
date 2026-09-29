@@ -5,9 +5,8 @@ import { useAuth } from '../auth'
 import { getGenres } from '../api'
 import PasswordStrength from '../components/PasswordStrength'
 
-/* Login / signup. Signup includes the taste-onboarding genre picks that feed the
-   personalised home (D25). Accounts are fabricated test accounts only — no real
-   personal data — and auth is currently client-side until the JWT backend lands. */
+// Login and signup. Signup also collects the taste genres used on the home page.
+// Test accounts only (D25).
 export default function Login() {
   const navigate = useNavigate()
   const { login, signup } = useAuth()
@@ -134,7 +133,7 @@ export default function Login() {
       </form>
 
       <p className="text-xs text-muted text-center">
-        Test accounts only. Any email and an 8+ character password will work — no real
+        Test accounts only. Any email and an 8+ character password will work - no real
         personal data is collected or stored.
       </p>
     </div>
